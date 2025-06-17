@@ -9,7 +9,7 @@
         MinHeight="300" MinWidth="400"
         x:Class="ToyRobotSimulator.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/logo.ico"
         Title="Robot Simulator">
 
 	<Design.DataContext>

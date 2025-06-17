@@ -19,13 +19,13 @@ public class Simulator
     public event EventHandler<MessageEventArgs>? eh_Warning;
     public event EventHandler<MessageEventArgs>? eh_SendMessage;
 
-    public Robot rob;
+    public Robot? rob;
 
     public bool isRunning = false;
 
     private int runningLineId;
-    private CancellationTokenSource cts;
-    private TaskCompletionSource<bool> tcs;
+    private CancellationTokenSource? cts;
+    private TaskCompletionSource<bool>? tcs;
 
     public Simulator()
     {
@@ -76,20 +76,20 @@ public class Simulator
                     {
                         case "PLACE":
                             string[] placeInfo = tokenLines[i].tokens[++j].Split(',');
-                            rob.Place(int.Parse(placeInfo[0]), int.Parse(placeInfo[1]), Enum.Parse<Direction>(placeInfo[2]));
+                            rob?.Place(int.Parse(placeInfo[0]), int.Parse(placeInfo[1]), Enum.Parse<Direction>(placeInfo[2]));
                             break;
                         case "MOVE":
-                            rob.Move();
+                            rob?.Move();
                             break;
                         case "LEFT":
-                            rob.Rotate("LEFT");
+                            rob?.Rotate("LEFT");
                             break;
                         case "RIGHT":
-                            rob.Rotate("RIGHT");
+                            rob?.Rotate("RIGHT");
                             break;
                         case "REPORT":
-                            rob.Report();
-                            if (!string.IsNullOrEmpty(rob.message)) eh_SendMessage?.Invoke(this, new MessageEventArgs(rob.message, runningLineId));
+                            rob?.Report();
+                            if (!string.IsNullOrEmpty(rob?.message)) eh_SendMessage?.Invoke(this, new MessageEventArgs(rob.message, runningLineId));
                             break;
                         default:
                             break;
@@ -121,7 +121,7 @@ public class Simulator
 
     public void StopRunning()
     {
-        cts.Cancel();
+        cts?.Cancel();
     }
 
     public void RunNextLine()

@@ -13,14 +13,14 @@ public partial class RobotPreview : UserControl
 {
     public double unitSize = 50;
     public int workspaceWidthUnit = 5, workspaceHeightUnit = 5;
-    public new SolidColorBrush robotColor = new() { Color = Colors.LightBlue };
-    public new SolidColorBrush DangerColor = new() { Color = Colors.Crimson };
+    public SolidColorBrush robotColor = new() { Color = Colors.LightBlue };
+    public SolidColorBrush DangerColor = new() { Color = Colors.Crimson };
 
     private double originX, originY;
-    private TranslateTransform robotTranslate;
-    private RotateTransform robotRotate;
+    private TranslateTransform? robotTranslate;
+    private RotateTransform? robotRotate;
 
-    private DispatcherTimer flashTimer;
+    private DispatcherTimer? flashTimer;
 
     public RobotPreview()
     {
@@ -116,14 +116,14 @@ public partial class RobotPreview : UserControl
 
     public void Place(int unitX, int unitY, Direction dir)
     {
-        robotTranslate.X = originX + unitX * unitSize;
-        robotTranslate.Y = originY + unitY * unitSize;
-        robotRotate.Angle = ((int)dir) % 4 * 90;
+        robotTranslate!.X = originX + unitX * unitSize;
+        robotTranslate!.Y = originY + unitY * unitSize;
+        robotRotate!.Angle = ((int)dir) % 4 * 90;
     }
 
     public void Move(int unitX, int unitY)
     {
-        double curX = robotTranslate.X;
+        double curX = robotTranslate!.X;
         double curY = robotTranslate.Y;
         robotTranslate.X += unitX * unitSize;
         robotTranslate.Y += unitY * unitSize;
@@ -131,18 +131,18 @@ public partial class RobotPreview : UserControl
 
     public void Rotate(Direction dir)
     {
-        robotRotate.Angle = ((int)dir) % 4 * 90;
+        robotRotate!.Angle = ((int)dir) % 4 * 90;
     }
 
     public void Danger(bool status)
     {
         if(status == true)
         {
-            flashTimer.Start();
+            flashTimer?.Start();
         }
         else
         {
-            flashTimer.Stop();
+            flashTimer?.Stop();
             bdr_InnerRobot.Background = robotColor;
         }
     }

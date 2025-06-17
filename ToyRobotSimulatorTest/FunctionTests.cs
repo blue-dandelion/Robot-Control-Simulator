@@ -60,7 +60,7 @@ public class FunctionTests
         sim.eh_Warning += (sender, e) => { message += $"Warning: {e.Message}\n"; };
         sim.eh_SendMessage += (sender, e) => { message += $"Output: {e.Message}\n"; };
 
-        sim.Run(code);
+        sim.Run(code, TimeSpan.Zero);
 
         _output.WriteLine(message);
 
