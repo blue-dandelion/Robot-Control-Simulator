@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -30,15 +31,77 @@ public partial class MainWindow : Window
         #region UI
         txtbox_PlaceX = Utils.TextBox_Int(txtbox_PlaceX, int.MinValue, int.MaxValue);
         txtbox_PlaceY = Utils.TextBox_Int(txtbox_PlaceY, int.MinValue, int.MaxValue);
+        txtbox_TimeSpan = Utils.TextBox_Double(txtbox_TimeSpan, 0, double.MaxValue);
+        #endregion
+
+        #region Execute
+        btn_Run.Click += (sender, e) =>
+        {
+            ClearResult();
+            ResetSimulator();
+
+            btn_Run.IsEnabled = false;
+            btn_RunLine.IsEnabled = false;
+            btn_StopRun.IsEnabled = true;
+            btn_Reset.IsEnabled = false;
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                sim.Run(aetxtedt_CodeEditor.Text, TimeSpan.FromSeconds(double.Parse(txtbox_TimeSpan.Text!)));
+            });
+        };
+
+        btn_RunLine.Click += (sender, e) =>
+        {
+            if (!sim.isRunning)
+            {
+                ClearResult();
+                ResetSimulator();
+
+                btn_RunLine.Content = "Next Line";
+                btn_Run.IsEnabled = false;
+                btn_StopRun.IsEnabled = true;
+                btn_Reset.IsEnabled = false;
+
+                Dispatcher.UIThread.Post(() =>
+                {
+                    sim.Run(aetxtedt_CodeEditor.Text, TimeSpan.Zero, true);
+                });
+            }
+            else
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    sim.RunNextLine();
+                });
+            }
+        };
+
+        btn_StopRun.Click += (sender, e) =>
+        {
+            if (sim.isRunning)
+            {
+                sim.StopRunning();
+            }
+
+            StopRunningUI();
+        };
+
+        btn_Reset.Click += (sender, e) =>
+        {
+            ClearResult();
+            robprv.Reset();
+        };
+
         #endregion
 
         #region Enter code
         btn_EnterPLACE.Click += (sender, e) =>
         {
             // Make sure all the essential infos are provided
-            if (string.IsNullOrEmpty(vm.PlaceX) || string.IsNullOrEmpty(vm.PlaceY) || vm.DirectionSelectIndex < 0 || vm.DirectionSelectIndex >= Enum.GetValues(typeof(Direction)).Length) return;
+            if (string.IsNullOrEmpty(txtbox_PlaceX.Text) || string.IsNullOrEmpty(txtbox_PlaceY.Text) || cobbox_Direction.SelectedIndex < 0 || cobbox_Direction.SelectedIndex >= Enum.GetValues(typeof(Direction)).Length) return;
         
-            AddContentToCodeEditor($"PLACE {vm.PlaceX},{vm.PlaceY},{(Direction)(vm.DirectionSelectIndex)}\n");
+            AddContentToCodeEditor($"PLACE {txtbox_PlaceX.Text},{txtbox_PlaceY.Text},{(Direction)(cobbox_Direction.SelectedIndex)}\n");
         };
         btn_EnterMOVE.Click += (sender, e) =>
         {
@@ -144,43 +207,55 @@ public partial class MainWindow : Window
         };
         #endregion
 
-        #region Execute
+        #region Results
+        robprv.workspaceHeightUnit = 5;
+        robprv.workspaceHeightUnit = 5;
+        robprv.Reload();
+        #endregion
+
+    }
+
+    public void ResetSimulator()
+    {
+        sim = new()
+        {
+            spaceW = 5,
+            spaceH = 5,
+        };
+        sim.SetVirtualRobot(robprv);
+
+        sim.eh_ChangeRunLine += (sender, e) =>
+        {
+            lineHighlighter.runningLineId = e.RelatedCodeLineId;
+            aetxtedt_CodeEditor.TextArea.TextView.Redraw();
+        };
+
+        sim.eh_FinishRunning += (sender, e) =>
+        {
+            StopRunningUI();
+        };
+
         sim.eh_Warning += (sender, e) =>
         {
             AddWarning(e);
         };
+
         sim.eh_SendMessage += (sender, e) =>
         {
             AddOutput(e);
         };
+    }
 
-        btn_Run.Click += (sender, e) =>
-        {
-            ClearResult();
-            sim.Run(aetxtedt_CodeEditor.Text);
-        };
+    public void StopRunningUI()
+    {
+        btn_RunLine.Content = "Run Line";
+        btn_StopRun.IsEnabled = false;
+        btn_Run.IsEnabled = true;
+        btn_RunLine.IsEnabled = true;
+        btn_Reset.IsEnabled = true;
 
-        btn_RunLine.Click += (sender, e) =>
-        {
-        };
-
-        btn_ClearResult.Click += (sender, e) =>
-        {
-            ClearResult();
-        };
-        #endregion
-
-        #region Output
-        lisbox_OutputSwitch.SelectionChanged += (sender, e) =>
-        {
-            UpdateResults();
-        };
-        #endregion
-
-        #region
-
-        #endregion
-
+        lineHighlighter.runningLineId = -1;
+        aetxtedt_CodeEditor.TextArea.TextView.Redraw();
     }
 
     public void AddContentToCodeEditor(string content)
@@ -241,14 +316,8 @@ public partial class MainWindow : Window
 
     public void UpdateResults()
     {
-        if (lisbox_OutputSwitch.SelectedIndex == 0)
-        {
-            aetxtedt_Results.Text = errorList;
-        }
-        else
-        {
-            aetxtedt_Results.Text = output;
-        }
+        aetxtedt_ErrorList.Text = errorList;
+        aetxtedt_Output.Text = output;
 
         aetxtedt_CodeEditor.TextArea.TextView.Redraw();
     }
@@ -256,8 +325,11 @@ public partial class MainWindow : Window
     public void ClearResult()
     {
         errorList = string.Empty;
+        aetxtedt_ErrorList.Text = string.Empty;
         output = string.Empty;
+        aetxtedt_Output.Text = string.Empty;
         lineHighlighter.ResetHighlight();
+        aetxtedt_CodeEditor.TextArea.TextView.Redraw();
     }
 
 }
