@@ -195,10 +195,9 @@ public class LineHighlighter : DocumentColorizingTransformer
     public List<int> warningLineIds { get; set; } = new();
     public List<int> errorLineIds { get; set; } = new();
     
-
-    static SolidColorBrush colRunningLine = new SolidColorBrush(Colors.LightBlue);
-    static SolidColorBrush colWarningLine = new SolidColorBrush(Color.FromArgb(100, 255, 255, 0));
-    static SolidColorBrush colErrorLine = new SolidColorBrush(Color.FromArgb(100, 255, 0, 0));
+    static SolidColorBrush colRunningLine = new SolidColorBrush(SignColors.Running, SignColors.lineBackgroundOpacity);
+    static SolidColorBrush colWarningLine = new SolidColorBrush(SignColors.warning, SignColors.lineBackgroundOpacity);
+    static SolidColorBrush colErrorLine = new SolidColorBrush(SignColors.error, SignColors.lineBackgroundOpacity);
 
     public void ResetHighlight()
     {

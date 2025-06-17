@@ -1,6 +1,9 @@
 using Avalonia.Controls;
+using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
+using AvaloniaEdit.Document;
+using AvaloniaEdit.Rendering;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,6 +25,9 @@ public partial class MainWindow : Window
     Simulator sim = new();
     LineHighlighter lineHighlighter = new LineHighlighter();
 
+    private int workspaceW = 5;
+    private int workspaceH = 5;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -34,14 +40,17 @@ public partial class MainWindow : Window
         txtbox_TimeSpan = Utils.TextBox_Double(txtbox_TimeSpan, 0, double.MaxValue);
         #endregion
 
-        #region Execute
+        #region Simulator Control Section
         btn_Run.Click += (sender, e) =>
         {
             ClearResult();
             ResetSimulator();
 
+            if (string.IsNullOrWhiteSpace(aetxtedt_CodeEditor.Text) || string.IsNullOrEmpty(aetxtedt_CodeEditor.Text)) return;
+
             btn_Run.IsEnabled = false;
             btn_RunLine.IsEnabled = false;
+            txtbox_TimeSpan.IsEnabled = false;
             btn_StopRun.IsEnabled = true;
             btn_Reset.IsEnabled = false;
 
@@ -58,8 +67,11 @@ public partial class MainWindow : Window
                 ClearResult();
                 ResetSimulator();
 
+                if (string.IsNullOrWhiteSpace(aetxtedt_CodeEditor.Text) || string.IsNullOrEmpty(aetxtedt_CodeEditor.Text)) return;
+
                 btn_RunLine.Content = "Next Line";
                 btn_Run.IsEnabled = false;
+                txtbox_TimeSpan.IsEnabled = false;
                 btn_StopRun.IsEnabled = true;
                 btn_Reset.IsEnabled = false;
 
@@ -95,12 +107,14 @@ public partial class MainWindow : Window
 
         #endregion
 
-        #region Enter code
+        #region Editor Section
+
+        #region Command Input
         btn_EnterPLACE.Click += (sender, e) =>
         {
             // Make sure all the essential infos are provided
             if (string.IsNullOrEmpty(txtbox_PlaceX.Text) || string.IsNullOrEmpty(txtbox_PlaceY.Text) || cobbox_Direction.SelectedIndex < 0 || cobbox_Direction.SelectedIndex >= Enum.GetValues(typeof(Direction)).Length) return;
-        
+
             AddContentToCodeEditor($"PLACE {txtbox_PlaceX.Text},{txtbox_PlaceY.Text},{(Direction)(cobbox_Direction.SelectedIndex)}\n");
         };
         btn_EnterMOVE.Click += (sender, e) =>
@@ -110,7 +124,7 @@ public partial class MainWindow : Window
         btn_EnterLEFT.Click += (sender, e) =>
         {
             AddContentToCodeEditor("LEFT\n");
-        }; 
+        };
         btn_EnterRIGHT.Click += (sender, e) =>
         {
             AddContentToCodeEditor("RIGHT\n");
@@ -121,7 +135,7 @@ public partial class MainWindow : Window
         };
         #endregion
 
-        #region Code Editor Control
+        #region IDE
         btn_ImportFile.Click += async (sender, e) =>
         {
             var topLevel = TopLevel.GetTopLevel(this);
@@ -167,7 +181,19 @@ public partial class MainWindow : Window
             var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions()
             {
                 Title = "Save Code File",
-                DefaultExtension = "txt"
+                SuggestedFileName = "MyCode.txt",
+                FileTypeChoices = new List<FilePickerFileType>
+                {
+                    new FilePickerFileType("Text Documents")
+                    {
+                        Patterns = ["*.txt"],
+                        MimeTypes = ["text/plain"]
+                    },
+                    new FilePickerFileType("All Files")
+                    {
+                        Patterns = ["*.*"],
+                    }
+                }
             });
 
             if (file != null)
@@ -186,9 +212,7 @@ public partial class MainWindow : Window
             aetxtedt_CodeEditor.Text = null;
             aetxtedt_CodeEditor.TextArea.Caret.Offset = 0;
         };
-        #endregion
 
-        #region IDE
         aetxtedt_CodeEditor.TextArea.TextView.LineTransformers.Add(new KeywordColorizer());
         aetxtedt_CodeEditor.TextArea.TextView.LineTransformers.Add(lineHighlighter);
 
@@ -207,20 +231,34 @@ public partial class MainWindow : Window
         };
         #endregion
 
-        #region Results
-        robprv.workspaceHeightUnit = 5;
-        robprv.workspaceHeightUnit = 5;
+        #endregion
+
+        #region Result Section
+        aetxtedt_ErrorList.TextArea.TextView.LineTransformers.Add(new OutputKeywordColorizer());
+        aetxtedt_ErrorList.TextChanged += (sender, e) =>
+        {
+            aetxtedt_ErrorList.TextArea.TextView.Redraw();
+        };
+        aetxtedt_Output.TextArea.TextView.LineTransformers.Add(new OutputKeywordColorizer());
+        aetxtedt_Output.TextChanged += (sender, e) =>
+        {
+            aetxtedt_Output.TextArea.TextView.Redraw();
+        };
+
+        robprv.workspaceHeightUnit = workspaceW;
+        robprv.workspaceHeightUnit = workspaceH;
         robprv.Reload();
         #endregion
 
     }
 
+    #region Simulator Control Section
     public void ResetSimulator()
     {
         sim = new()
         {
-            spaceW = 5,
-            spaceH = 5,
+            spaceW = workspaceW,
+            spaceH = workspaceH,
         };
         sim.SetVirtualRobot(robprv);
 
@@ -253,11 +291,14 @@ public partial class MainWindow : Window
         btn_Run.IsEnabled = true;
         btn_RunLine.IsEnabled = true;
         btn_Reset.IsEnabled = true;
+        txtbox_TimeSpan.IsEnabled = true;
 
         lineHighlighter.runningLineId = -1;
         aetxtedt_CodeEditor.TextArea.TextView.Redraw();
     }
+    #endregion
 
+    #region Editor Section
     public void AddContentToCodeEditor(string content)
     {
         int caretOffset = aetxtedt_CodeEditor.TextArea.Caret.Offset;
@@ -265,7 +306,9 @@ public partial class MainWindow : Window
         aetxtedt_CodeEditor.TextArea.Caret.Offset = caretOffset + content.Length;
         aetxtedt_CodeEditor.TextArea.Caret.BringCaretToView();
     }
+    #endregion
 
+    #region Result Section
     public void AddWarning(MessageEventArgs e)
     {
         if (!string.IsNullOrEmpty(errorList)) errorList += "\n";
@@ -331,5 +374,38 @@ public partial class MainWindow : Window
         lineHighlighter.ResetHighlight();
         aetxtedt_CodeEditor.TextArea.TextView.Redraw();
     }
+    #endregion
 
+}
+
+public class OutputKeywordColorizer : DocumentColorizingTransformer
+{
+    public Dictionary<string, SolidColorBrush> keywords = new()
+    {
+        {"Warning", new SolidColorBrush(SignColors.warning) },
+        {"Error", new SolidColorBrush(SignColors.error) },
+    };
+
+    protected override void ColorizeLine(DocumentLine line)
+    {
+        if (line.IsDeleted) return;
+
+        string text = CurrentContext.Document.GetText(line);
+
+        foreach (string child in keywords.Keys)
+        {
+            int index = text.IndexOf(child);
+            while (index >= 0)
+            {
+                ChangeLinePart(
+                    line.Offset + index,
+                    line.Offset + index + child.Length,
+                    element => element.TextRunProperties.SetForegroundBrush(
+                        keywords[child]
+                    ));
+
+                index = text.IndexOf(child, index + child.Length);
+            }
+        }
+    }
 }

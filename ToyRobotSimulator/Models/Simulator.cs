@@ -29,6 +29,7 @@ public class Simulator
 
     public Simulator()
     {
+
     }
 
     public void SetVirtualRobot(RobotPreview? prv = null)

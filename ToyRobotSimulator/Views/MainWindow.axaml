@@ -10,199 +10,205 @@
         x:Class="ToyRobotSimulator.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="ToyRobotSimulator">
+        Title="Robot Simulator">
 
-  <Design.DataContext>
-    <!-- This only sets the DataContext for the previewer in an IDE,
+	<Design.DataContext>
+		<!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-    <vm:MainWindowViewModel/>
-  </Design.DataContext>
+		<vm:MainWindowViewModel/>
+	</Design.DataContext>
 
-  <Grid>
-    <Grid.RowDefinitions>
-      <RowDefinition Height="Auto"/>
-      <RowDefinition Height="*" MinHeight="100"/>
-      <RowDefinition Height="Auto"/>
-      <RowDefinition Height="*" MinHeight="100"/>
-    </Grid.RowDefinitions>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*" MinHeight="100"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*" MinHeight="100"/>
+		</Grid.RowDefinitions>
 
-    <!--Robot Control Section-->
-    <Grid RowDefinitions="Auto,Auto">
-      <StackPanel Orientation="Horizontal" Margin="0,10" Spacing="5" HorizontalAlignment="Center">
-        <Label VerticalAlignment="Center">Time Span:</Label>
-        <TextBox Name="txtbox_TimeSpan">0</TextBox>
-        <Label VerticalAlignment="Center">Seconds</Label>
+		<!--Simulator Control Section-->
+		<Grid RowDefinitions="Auto,Auto">
+			<StackPanel Orientation="Horizontal" Margin="0,10" Spacing="5" HorizontalAlignment="Center">
+				<Label VerticalAlignment="Center">Time Span:</Label>
+				<TextBox Name="txtbox_TimeSpan">0</TextBox>
+				<Label VerticalAlignment="Center">Seconds</Label>
 
-        <Button Name="btn_Run" ToolTip.Tip="Run the code">
-          Run
-        </Button>
+				<Button Name="btn_Run" ToolTip.Tip="Run the code">
+					Run
+				</Button>
 
-        <Button Name="btn_RunLine" ToolTip.Tip="Run the focused code line">
-          Run Line
-        </Button>
-        
-        <Border Classes="VerticalDecorationLine"/>
+				<Button Name="btn_RunLine" ToolTip.Tip="Run the code line by line">
+					Run Line
+				</Button>
 
-        <Button Name="btn_StopRun" IsEnabled="False" ToolTip.Tip="Run the focused code line">
-          Stop
-        </Button>
+				<Border Classes="VerticalDecorationLine"/>
 
-        <Button Name="btn_Reset" ToolTip.Tip="Clear the results" HorizontalAlignment="Right">
-          Reset
-        </Button>
-      </StackPanel>
+				<Button Name="btn_StopRun" IsEnabled="False" ToolTip.Tip="Run the focused code line">
+					Stop
+				</Button>
 
-      <Border Grid.Row="1" Margin="0" Classes="HorizontalDecorationLine"/>
-    </Grid>
+				<Button Name="btn_Reset" ToolTip.Tip="Clear the results" HorizontalAlignment="Right">
+					Reset
+				</Button>
+			</StackPanel>
 
-    <!--Editor Section-->
-    <Grid Grid.Row="1">
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="Auto" MinWidth="100"/>
-        <ColumnDefinition Width="Auto"/>
-        <ColumnDefinition Width="*" MinWidth="100"/>
-      </Grid.ColumnDefinitions>
+			<Border Grid.Row="1" Margin="0" Classes="HorizontalDecorationLine"/>
+		</Grid>
 
-      <!--Commands-->
-      <ScrollViewer
-			  ScrollViewer.HorizontalScrollBarVisibility="Auto"
-			  ScrollViewer.VerticalScrollBarVisibility="Auto">
+		<!--Editor Section-->
+		<Grid Grid.Row="1">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto" MinWidth="100"/>
+				<ColumnDefinition Width="Auto"/>
+				<ColumnDefinition Width="*" MinWidth="100"/>
+			</Grid.ColumnDefinitions>
 
-        <Grid RowDefinitions="Auto,*">
-          <StackPanel Margin="10" Spacing="10">
-            <Label Classes="Title">Commands</Label>
-            <TextBlock>Press the button to add commands or Type </TextBlock>
+			<!--Command Input-->
+			<ScrollViewer
+					ScrollViewer.HorizontalScrollBarVisibility="Auto"
+					ScrollViewer.VerticalScrollBarVisibility="Auto">
 
-            <Button Name="btn_EnterPLACE"
-								ToolTip.Tip="Put the toy robot on the table in position and facing a direction">
-              PLACE
-            </Button>
+				<Grid RowDefinitions="Auto,*">
+					<StackPanel Margin="10" >
+						<Label Classes="Title">Commands</Label>
+						<TextBlock>Click the button or type to input commands.</TextBlock>
+					</StackPanel>
 
-            <StackPanel Orientation="Horizontal">
-              <StackPanel.Styles>
-                <Style Selector="Label">
-                  <Setter Property="VerticalAlignment" Value="Center"/>
-                </Style>
-              </StackPanel.Styles>
-              <Label>X:</Label>
-              <TextBox Name="txtbox_PlaceX" Text="{Binding PlaceX, Mode=TwoWay}"/>
+					<StackPanel Grid.Row="1" Margin="10" Spacing="10">
+						<StackPanel Orientation="Horizontal" Spacing="5">
+							<StackPanel.Styles>
+								<Style Selector="Label">
+									<Setter Property="VerticalAlignment" Value="Center"/>
+								</Style>
+							</StackPanel.Styles>
+							<Button Name="btn_EnterPLACE"
+									ToolTip.Tip="Put the toy robot on the table in position and facing a direction">
+								PLACE
+							</Button>
 
-              <Label Margin="5,0,0,0">Y:</Label>
-              <TextBox Name="txtbox_PlaceY" Text="{Binding PlaceY, Mode=TwoWay}"/>
+							<Label>X:</Label>
+							<TextBox Name="txtbox_PlaceX" Text="{Binding PlaceX, Mode=TwoWay}"/>
 
-              <Label Margin="5,0,0,0">Direction:</Label>
-              <ComboBox Name="cobbox_Direction" SelectedIndex="{Binding DirectionSelectIndex, Mode=TwoWay}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center">
-                <ComboBox.Styles>
-                  <Style Selector="ComboBoxItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                    <Setter Property="VerticalContentAlignment" Value="Center"/>
-                  </Style>
-                </ComboBox.Styles>
+							<Label>Y:</Label>
+							<TextBox Name="txtbox_PlaceY" Text="{Binding PlaceY, Mode=TwoWay}"/>
 
-                <ComboBoxItem>NORTH</ComboBoxItem>
-                <ComboBoxItem>EAST</ComboBoxItem>
-                <ComboBoxItem>SOUTH</ComboBoxItem>
-                <ComboBoxItem>WEST</ComboBoxItem>
-              </ComboBox>
-            </StackPanel>
+							<Label>Direction:</Label>
+							<ComboBox Name="cobbox_Direction" SelectedIndex="{Binding DirectionSelectIndex, Mode=TwoWay}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center">
+								<ComboBox.Styles>
+									<Style Selector="ComboBoxItem">
+										<Setter Property="HorizontalContentAlignment" Value="Center"/>
+										<Setter Property="VerticalContentAlignment" Value="Center"/>
+									</Style>
+								</ComboBox.Styles>
 
-            <Button Name="btn_EnterMOVE"
-							ToolTip.Tip="Move the toy robot one unit forward in the direction it is currently facing">
-              MOVE
-            </Button>
-            <Button Name="btn_EnterLEFT"
-							ToolTip.Tip="Rotate the robot 90 degrees in anticlockwise">
-              LEFT
-            </Button>
-            <Button Name="btn_EnterRIGHT"
-							ToolTip.Tip="Rotate the robot 90 degrees in clockwise">
-              RIGHT
-            </Button>
-            <Button Name="btn_EnterREPORT"
-							ToolTip.Tip="Output the robot's current situation">
-              REPORT
-            </Button>
+								<ComboBoxItem>NORTH</ComboBoxItem>
+								<ComboBoxItem>EAST</ComboBoxItem>
+								<ComboBoxItem>SOUTH</ComboBoxItem>
+								<ComboBoxItem>WEST</ComboBoxItem>
+							</ComboBox>
+						</StackPanel>
 
-          </StackPanel>
-        </Grid>
+						<Button Name="btn_EnterMOVE"
+										ToolTip.Tip="Move the toy robot one unit forward in the direction it is currently facing">
+							MOVE
+						</Button>
+						<Button Name="btn_EnterLEFT"
+										ToolTip.Tip="Rotate the robot 90 degrees in anticlockwise">
+							LEFT
+						</Button>
+						<Button Name="btn_EnterRIGHT"
+										ToolTip.Tip="Rotate the robot 90 degrees in clockwise">
+							RIGHT
+						</Button>
+						<Button Name="btn_EnterREPORT"
+										ToolTip.Tip="Output the robot's current situation">
+							REPORT
+						</Button>
 
-      </ScrollViewer>
+					</StackPanel>
+				</Grid>
 
-      <GridSplitter Grid.Column="1"/>
+			</ScrollViewer>
 
-      <!--IDE-->
-      <Grid Grid.Column="2" RowDefinitions="Auto,Auto,*" Margin="10">
-        <Grid ColumnDefinitions="Auto,*">
-          <StackPanel Orientation="Horizontal" Spacing="5">
-            <Button Name="btn_ImportFile"
-              ToolTip.Tip="Insert code from a .txt file">
-              + Insert from file
-            </Button>
+			<GridSplitter Grid.Column="1"/>
 
-            <Button Name="btn_ExportFile"
-              ToolTip.Tip="Export code to a .txt file">
-              + Save file
-            </Button>
-          </StackPanel>
+			<!--IDE-->
+			<Grid Grid.Column="2" RowDefinitions="Auto,Auto,*" Margin="10">
+				<Grid ColumnDefinitions="Auto,*">
+					<StackPanel Orientation="Horizontal" Spacing="5">
+						<Button Name="btn_ImportFile"
+						  ToolTip.Tip="Insert code from a .txt file">
+							Insert from File
+						</Button>
 
-          <Button Name="btn_ClearCode" Grid.Column="1" HorizontalAlignment="Right"
-                  ToolTip.Tip="Clear all the code">
-            Clear
-          </Button>
-        </Grid>
+						<Button Name="btn_ExportFile"
+						  ToolTip.Tip="Export code to a .txt file">
+							Export File
+						</Button>
+					</StackPanel>
 
-        <Border Grid.Row="2" Classes="Frame" Margin="0,5,0,0">
-          <avaloniaEdit:TextEditor Name="aetxtedt_CodeEditor"
-											 FontSize="14"
-											 ShowLineNumbers="True"
-											 ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
-        </Border>
-      </Grid>
-    </Grid>
+					<Button Name="btn_ClearCode" Grid.Column="1" HorizontalAlignment="Right"
+							ToolTip.Tip="Clear all the code">
+						Clear
+					</Button>
+				</Grid>
 
-    <GridSplitter Grid.Row="2"/>
+				<Border Grid.Row="2" Classes="Frame" Margin="0,5,0,0">
+					<avaloniaEdit:TextEditor Name="aetxtedt_CodeEditor"
+													   FontSize="14"
+													   ShowLineNumbers="True"
+													   ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
+				</Border>
+			</Grid>
+		</Grid>
 
-    <!--Result Section-->
-    <Grid Grid.Row="3">
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="*" MinWidth="100"/>
-        <ColumnDefinition Width="2"/>
-        <ColumnDefinition Width="*" MinWidth="100"/>
-      </Grid.ColumnDefinitions>
+		<GridSplitter Grid.Row="2"/>
 
-      <Grid>
-        <Grid.RowDefinitions>
-          <RowDefinition Height="Auto"/>
-          <RowDefinition Height="*" MinHeight="20"/>
-          <RowDefinition Height="Auto"/>
-          <RowDefinition Height="*" MinHeight="20"/>
-        </Grid.RowDefinitions>
+		<!--Result Section-->
+		<Grid Grid.Row="3">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*" MinWidth="100"/>
+				<ColumnDefinition Width="2"/>
+				<ColumnDefinition Width="*" MinWidth="100"/>
+			</Grid.ColumnDefinitions>
 
-        <Grid Grid.Row="1" RowDefinitions="Auto,*" Margin="10">
-          <Label>Error List:</Label>
-          <avaloniaEdit:TextEditor Name="aetxtedt_ErrorList" Grid.Row="1" IsReadOnly="True"
-                                   Margin="0,10,0,0" Background="WhiteSmoke"
-                                   ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                   ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-        </Grid>
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="*" MinHeight="20"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="*" MinHeight="20"/>
+				</Grid.RowDefinitions>
 
-        <GridSplitter Grid.Row="2"/>
+				<Grid Grid.Row="1" RowDefinitions="Auto,*" Margin="10">
+					<Label FontWeight="Black">Error List:</Label>
+					<avaloniaEdit:TextEditor Name="aetxtedt_ErrorList" Grid.Row="1" IsReadOnly="True"
+											 Margin="0,2.5,0,0" Background="WhiteSmoke"
+											 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+											 ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+				</Grid>
 
-        <Grid Grid.Row="3" RowDefinitions="Auto,*" Margin="10">
-          <Label>Output:</Label>
-          <avaloniaEdit:TextEditor Name="aetxtedt_Output" IsReadOnly="True" Grid.Row="1"
-                                   Margin="0,10,0,0" Background="WhiteSmoke"
-                                   ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                   ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-        </Grid>
+				<GridSplitter Grid.Row="2"/>
+
+				<Grid Grid.Row="3" RowDefinitions="Auto,*" Margin="10">
+					<Label FontWeight="Black">Output:</Label>
+					<avaloniaEdit:TextEditor Name="aetxtedt_Output" IsReadOnly="True" Grid.Row="1"
+											 Margin="0,2.5,0,0" Background="WhiteSmoke"
+											 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+											 ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+				</Grid>
 
 
-      </Grid>
+			</Grid>
 
-      <GridSplitter Grid.Column="1"/>
+			<GridSplitter Grid.Column="1"/>
 
-      <uc:RobotPreview Name="robprv" Grid.Column="2"/>
-    </Grid>
+			<Grid Grid.Column="2">
+				<Image Source="/Assets/Compass.png" Width="100" Height="100" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10"/>
 
-  </Grid>
+				<uc:RobotPreview Name="robprv" />
+			</Grid>
+		</Grid>
+
+	</Grid>
 </Window>
