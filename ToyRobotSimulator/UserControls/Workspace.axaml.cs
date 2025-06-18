@@ -9,10 +9,12 @@ using System.Reactive;
 
 namespace ToyRobotSimulator.UserControls;
 
-public partial class RobotPreview : UserControl
+public partial class Workspace : UserControl
 {
     public double unitSize = 50;
-    public int workspaceWidthUnit = 5, workspaceHeightUnit = 5;
+    public int width, height;
+
+    public double zoomSpeed = 5;
     public SolidColorBrush robotColor = new() { Color = Colors.LightBlue };
     public SolidColorBrush DangerColor = new() { Color = Colors.Crimson };
 
@@ -22,74 +24,58 @@ public partial class RobotPreview : UserControl
 
     private DispatcherTimer? flashTimer;
 
-    public RobotPreview()
+    public Workspace()
     {
         InitializeComponent();
 
-        Reload();
+        Reload(5,5);
     }
 
-    public void Reload()
+    public void Reload(int workspaceW, int workspaceH)
     {
-        #region Resize
-        cav_Workspace.Width = workspaceWidthUnit * unitSize;
-        cav_Workspace.Height = workspaceHeightUnit * unitSize;
-        #endregion
+        width = workspaceW; 
+        height = workspaceH;
+
+        Resize();
+        Reset();
 
         #region Reference Line
-        grd_Ref.Width = workspaceWidthUnit * unitSize;
-        grd_Ref.Height = workspaceHeightUnit * unitSize;
-
         grd_Ref.ColumnDefinitions = new();
-        for(int i = 0; i < workspaceWidthUnit; i++)
+        for (int i = 0; i < workspaceW; i++)
         {
             grd_Ref.ColumnDefinitions.Add(new ColumnDefinition());
         }
 
         grd_Ref.RowDefinitions = new();
-        for (int i = 0; i < workspaceHeightUnit; i++)
+        for (int i = 0; i < workspaceH; i++)
         {
             grd_Ref.RowDefinitions.Add(new RowDefinition());
         }
 
         grd_Ref.Children.Clear();
-        for (int i = 0; i < workspaceWidthUnit; i++)
+        for (int i = 0; i < workspaceW; i++)
         {
-            for(int j = 0; j < workspaceHeightUnit; j++)
+            for (int j = 0; j < workspaceH; j++)
             {
                 Border bdr = new()
                 {
                     BorderBrush = new SolidColorBrush(Colors.LightGray),
                     BorderThickness = new Thickness(1),
                     Background = new SolidColorBrush(Colors.Transparent),
-                    ZIndex = -1000
                 };
 
-                Grid.SetRow(bdr, i);
-                Grid.SetColumn(bdr, j);
+                Grid.SetRow(bdr, j);
+                Grid.SetColumn(bdr, i);
 
                 grd_Ref.Children.Add(bdr);
             }
         }
         #endregion
 
-        #region Robot
-        originX = 0;
-        originY = unitSize * (workspaceHeightUnit - 1);
-
-        bdr_Robot.Width = unitSize;
-        bdr_Robot.Height = unitSize;
-
-        bdr_InnerRobot.Background = robotColor;
-        bdr_InnerRobot.CornerRadius = new CornerRadius(bdr_InnerRobot.Width / 2, bdr_InnerRobot.Width / 2, 0, 0);
-
-        Reset();
-        #endregion
-
         #region Danger
         flashTimer = new()
         {
-            Interval = TimeSpan.FromMilliseconds(250)
+            Interval = TimeSpan.FromMilliseconds(200)
         };
         flashTimer.Tick += (sender, e) =>
         {
@@ -103,7 +89,6 @@ public partial class RobotPreview : UserControl
             }
         };
         #endregion
-
     }
 
     public void Reset()
@@ -112,6 +97,11 @@ public partial class RobotPreview : UserControl
         bdr_Robot.RenderTransform = robotTranslate;
         robotRotate = new RotateTransform(0);
         bdr_InnerRobot.RenderTransform = robotRotate;
+
+        if (flashTimer?.IsEnabled == true)
+        {
+            Danger(false);
+        }
     }
 
     public void Place(int unitX, int unitY, Direction dir)
@@ -145,5 +135,39 @@ public partial class RobotPreview : UserControl
             flashTimer?.Stop();
             bdr_InnerRobot.Background = robotColor;
         }
+    }
+
+    public void ZoomIn()
+    {
+        unitSize = Math.Min(unitSize + zoomSpeed, 100);
+        Resize();
+    }
+
+    public void ZoomOut()
+    {
+        unitSize = Math.Max(unitSize - zoomSpeed, 10);
+        Resize();
+    }
+
+    private void Resize()
+    {
+        cav_Workspace.Width = width * unitSize;
+        cav_Workspace.Height = height * unitSize;
+
+        originX = 0;
+        originY = unitSize * (height - 1);
+
+        if(robotTranslate != null && robotTranslate != null)
+        {
+            double posX = robotTranslate.X / bdr_Robot.Width;
+            double posY = robotTranslate.Y / bdr_Robot.Height;
+            robotTranslate.X = posX * unitSize;
+            robotTranslate.Y = posY * unitSize;
+        }
+
+        bdr_Robot.Width = unitSize;
+        bdr_Robot.Height = unitSize;
+
+        bdr_InnerRobot.CornerRadius = new CornerRadius(bdr_InnerRobot.Width / 2, bdr_InnerRobot.Width / 2, 0, 0);
     }
 }

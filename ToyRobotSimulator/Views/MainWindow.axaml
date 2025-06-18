@@ -28,29 +28,40 @@
 
 		<!--Simulator Control Section-->
 		<Grid RowDefinitions="Auto,Auto">
-			<StackPanel Orientation="Horizontal" Margin="0,10" Spacing="5" HorizontalAlignment="Center">
-				<Label VerticalAlignment="Center">Time Span:</Label>
-				<TextBox Name="txtbox_TimeSpan">0</TextBox>
-				<Label VerticalAlignment="Center">Seconds</Label>
+			<Grid Margin="0,10">
+				<StackPanel Orientation="Horizontal" Margin="10,0,0,0" Spacing="5">
+					<Label FontWeight="Black" VerticalAlignment="Center">Workspace</Label>
+					<Label VerticalAlignment="Center">W:</Label>
+					<TextBox Name="txtbox_WorkspaceW">5</TextBox>
+					<Label VerticalAlignment="Center">H:</Label>
+					<TextBox Name="txtbox_WorkspaceH">5</TextBox>
+					<Button Name="btn_ReloadWorkspace">Reload</Button>
+				</StackPanel>
+				
+				<StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+					<Label VerticalAlignment="Center">Time Span:</Label>
+					<TextBox Name="txtbox_TimeSpan">0</TextBox>
+					<Label VerticalAlignment="Center">Seconds</Label>
 
-				<Button Name="btn_Run" ToolTip.Tip="Run the code">
-					Run
-				</Button>
+					<Button Name="btn_Run" ToolTip.Tip="Run the code">
+						Run
+					</Button>
 
-				<Button Name="btn_RunLine" ToolTip.Tip="Run the code line by line">
-					Run Line
-				</Button>
+					<Button Name="btn_RunLine" ToolTip.Tip="Run the code line by line">
+						Run Line
+					</Button>
 
-				<Border Classes="VerticalDecorationLine"/>
+					<Border Classes="VerticalDecorationLine"/>
 
-				<Button Name="btn_StopRun" IsEnabled="False" ToolTip.Tip="Run the focused code line">
-					Stop
-				</Button>
+					<Button Name="btn_StopRun" IsEnabled="False" ToolTip.Tip="Run the focused code line">
+						Stop
+					</Button>
 
-				<Button Name="btn_Reset" ToolTip.Tip="Clear the results" HorizontalAlignment="Right">
-					Reset
-				</Button>
-			</StackPanel>
+					<Button Name="btn_Reset" ToolTip.Tip="Clear the results" HorizontalAlignment="Right">
+						Reset
+					</Button>
+				</StackPanel>
+			</Grid>
 
 			<Border Grid.Row="1" Margin="0" Classes="HorizontalDecorationLine"/>
 		</Grid>
@@ -204,9 +215,22 @@
 			<GridSplitter Grid.Column="1"/>
 
 			<Grid Grid.Column="2">
-				<Image Source="/Assets/Compass.png" Width="100" Height="100" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10"/>
+				<ScrollViewer
+					ScrollViewer.HorizontalScrollBarVisibility="Auto"
+					ScrollViewer.VerticalScrollBarVisibility="Auto">
+					<uc:Workspace Name="ws_Preview" Margin="40"/>
+				</ScrollViewer>
 
-				<uc:RobotPreview Name="robprv" />
+				<StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10">
+					<Button Name="btn_ZoomIn">
+						+
+					</Button>
+					<Button Name="btn_ZoomOut">
+						-
+					</Button>
+				</StackPanel>
+				
+				<Image Source="/Assets/Compass.png" Width="100" Height="100" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10"/>
 			</Grid>
 		</Grid>
 

@@ -27,15 +27,15 @@ public class Simulator
     private CancellationTokenSource? cts;
     private TaskCompletionSource<bool>? tcs;
 
-    public Simulator()
+    public Simulator(Workspace workspace)
     {
-
+        Reset(workspace);
     }
 
-    public void SetVirtualRobot(RobotPreview? prv = null)
+    public void Reset(Workspace workspace)
     {
         // Generate a new virtual robot
-        rob = new Robot(spaceW, spaceH, prv);
+        rob = new Robot(workspace);
         rob.eh_Warning += (sender, e) =>
         {
             eh_Warning?.Invoke(this, new MessageEventArgs(e.Message, runningLineId));
@@ -121,6 +121,9 @@ public class Simulator
 
     public void StopRunning()
     {
+        isRunning = false;
+        eh_FinishRunning?.Invoke(this, new MessageEventArgs("", -1));
+
         cts?.Cancel();
     }
 

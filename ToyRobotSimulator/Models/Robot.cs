@@ -7,7 +7,7 @@ using ToyRobotSimulator.UserControls;
 
 namespace ToyRobotSimulator.Models;
 
-public class Robot(int spaceW, int spaceH, RobotPreview? prv)
+public class Robot(Workspace ws)
 {
     public int posX = -1;
     public int posY = -1;
@@ -20,14 +20,14 @@ public class Robot(int spaceW, int spaceH, RobotPreview? prv)
 
     public bool IsInWorkspace(int x, int y)
     {
-        if (x >= 0 && x < spaceW && y >= 0 && y < spaceH)
+        if (x >= 0 && x < ws.width && y >= 0 && y < ws.height)
         {
-            prv?.Danger(false);
+            ws?.Danger(false);
             return true;
         }
 
         eh_Warning?.Invoke(this, new MessageEventArgs("The robot falls out of the work space!"));
-        prv?.Danger(true);
+        ws?.Danger(true);
         return false;
     }
 
@@ -44,7 +44,7 @@ public class Robot(int spaceW, int spaceH, RobotPreview? prv)
         // Since the robot has been places, the following commands will be able to run
         startMove = true;
 
-        prv?.Place(x, -y, facing);
+        ws?.Place(x, -y, facing);
     }
 
     public void Move()
@@ -85,7 +85,7 @@ public class Robot(int spaceW, int spaceH, RobotPreview? prv)
         posX += moveX;
         posY += moveY;
 
-        prv?.Move(moveX, -moveY);
+        ws?.Move(moveX, -moveY);
     }
 
     public void Rotate(string dir)
@@ -107,7 +107,7 @@ public class Robot(int spaceW, int spaceH, RobotPreview? prv)
                 break;
         }
 
-        prv?.Rotate(facing);
+        ws?.Rotate(facing);
     }
 
     public void Report()

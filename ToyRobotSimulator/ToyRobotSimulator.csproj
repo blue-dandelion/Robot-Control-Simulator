@@ -13,8 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="UserControls\RobotPreview.axaml.cs">
-      <DependentUpon>RobotPreview.axaml</DependentUpon>
+    <Compile Update="UserControls\Workspace.axaml.cs">
+      <DependentUpon>Workspace.axaml</DependentUpon>
     </Compile>
   </ItemGroup>
 

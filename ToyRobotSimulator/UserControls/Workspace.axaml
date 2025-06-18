@@ -3,10 +3,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="800"
-             x:Class="ToyRobotSimulator.UserControls.RobotPreview">
+             x:Class="ToyRobotSimulator.UserControls.Workspace">
 
   <Canvas Name="cav_Workspace" Grid.RowSpan="1000" Grid.ColumnSpan="1000" Margin="10" Background="WhiteSmoke">
-    <Grid Name="grd_Ref" Opacity="0.5"/>
+    <Grid Name="grd_Ref" Width="{Binding #cav_Workspace.Width}" Height="{Binding #cav_Workspace.Height}" Opacity="0.5"/>
     
     <Border Name="bdr_Robot">
       <Border Name="bdr_InnerRobot" CornerRadius="10,10,0,0" Width="{Binding #bdr_Robot.Width}" Height="{Binding #bdr_Robot.Height}" Background="LightBlue">

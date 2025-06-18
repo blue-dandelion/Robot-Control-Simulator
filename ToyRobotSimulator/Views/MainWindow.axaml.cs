@@ -19,14 +19,8 @@ public partial class MainWindow : Window
 {
     MainWindowViewModel vm = new();
 
-    string errorList = string.Empty;
-    string output = string.Empty;
-
-    Simulator sim = new();
-    LineHighlighter lineHighlighter = new LineHighlighter();
-
-    private int workspaceW = 5;
-    private int workspaceH = 5;
+    private Simulator sim;
+    private LineHighlighter lineHighlighter = new LineHighlighter();
 
     public MainWindow()
     {
@@ -35,16 +29,48 @@ public partial class MainWindow : Window
         this.Focusable = true;
 
         #region UI
+        txtbox_WorkspaceW = Utils.TextBox_Int(txtbox_WorkspaceW, int.MinValue, int.MaxValue);
+        txtbox_WorkspaceH = Utils.TextBox_Int(txtbox_WorkspaceH, int.MinValue, int.MaxValue);
         txtbox_PlaceX = Utils.TextBox_Int(txtbox_PlaceX, int.MinValue, int.MaxValue);
         txtbox_PlaceY = Utils.TextBox_Int(txtbox_PlaceY, int.MinValue, int.MaxValue);
         txtbox_TimeSpan = Utils.TextBox_Double(txtbox_TimeSpan, 0, double.MaxValue);
         #endregion
 
         #region Simulator Control Section
+        // Simulator
+        sim = new(ws_Preview);
+
+        sim.eh_ChangeRunLine += (sender, e) =>
+        {
+            lineHighlighter.runningLineId = e.RelatedCodeLineId;
+            aetxtedt_CodeEditor.TextArea.TextView.Redraw();
+        };
+
+        sim.eh_FinishRunning += (sender, e) =>
+        {
+            StopRunningUI();
+        };
+
+        sim.eh_Warning += (sender, e) =>
+        {
+            AddWarning(e);
+        };
+
+        sim.eh_SendMessage += (sender, e) =>
+        {
+            AddOutput(e);
+        };
+
+        // Buttons
+        btn_ReloadWorkspace.Click += (sender, e) =>
+        {
+            ws_Preview.Reload(int.Parse(txtbox_WorkspaceW.Text!), int.Parse(txtbox_WorkspaceH.Text!));
+            sim.Reset(ws_Preview);
+        };
+
         btn_Run.Click += (sender, e) =>
         {
             ClearResult();
-            ResetSimulator();
 
             if (string.IsNullOrWhiteSpace(aetxtedt_CodeEditor.Text) || string.IsNullOrEmpty(aetxtedt_CodeEditor.Text)) return;
 
@@ -65,7 +91,6 @@ public partial class MainWindow : Window
             if (!sim.isRunning)
             {
                 ClearResult();
-                ResetSimulator();
 
                 if (string.IsNullOrWhiteSpace(aetxtedt_CodeEditor.Text) || string.IsNullOrEmpty(aetxtedt_CodeEditor.Text)) return;
 
@@ -95,14 +120,12 @@ public partial class MainWindow : Window
             {
                 sim.StopRunning();
             }
-
-            StopRunningUI();
         };
 
         btn_Reset.Click += (sender, e) =>
         {
             ClearResult();
-            robprv.Reset();
+            ws_Preview.Reset();
         };
 
         #endregion
@@ -136,6 +159,7 @@ public partial class MainWindow : Window
         #endregion
 
         #region IDE
+        // Buttons
         btn_ImportFile.Click += async (sender, e) =>
         {
             var topLevel = TopLevel.GetTopLevel(this);
@@ -213,6 +237,7 @@ public partial class MainWindow : Window
             aetxtedt_CodeEditor.TextArea.Caret.Offset = 0;
         };
 
+        // IDE
         aetxtedt_CodeEditor.TextArea.TextView.LineTransformers.Add(new KeywordColorizer());
         aetxtedt_CodeEditor.TextArea.TextView.LineTransformers.Add(lineHighlighter);
 
@@ -234,6 +259,7 @@ public partial class MainWindow : Window
         #endregion
 
         #region Result Section
+        // Text
         aetxtedt_ErrorList.TextArea.TextView.LineTransformers.Add(new OutputKeywordColorizer());
         aetxtedt_ErrorList.TextChanged += (sender, e) =>
         {
@@ -245,45 +271,21 @@ public partial class MainWindow : Window
             aetxtedt_Output.TextArea.TextView.Redraw();
         };
 
-        robprv.workspaceHeightUnit = workspaceW;
-        robprv.workspaceHeightUnit = workspaceH;
-        robprv.Reload();
+        // Preview
+        btn_ZoomIn.Click += (sender, e) =>
+        {
+            ws_Preview.ZoomIn();
+        };
+
+        btn_ZoomOut.Click += (sender, e) =>
+        {
+            ws_Preview.ZoomOut();
+        };
         #endregion
 
     }
 
     #region Simulator Control Section
-    public void ResetSimulator()
-    {
-        sim = new()
-        {
-            spaceW = workspaceW,
-            spaceH = workspaceH,
-        };
-        sim.SetVirtualRobot(robprv);
-
-        sim.eh_ChangeRunLine += (sender, e) =>
-        {
-            lineHighlighter.runningLineId = e.RelatedCodeLineId;
-            aetxtedt_CodeEditor.TextArea.TextView.Redraw();
-        };
-
-        sim.eh_FinishRunning += (sender, e) =>
-        {
-            StopRunningUI();
-        };
-
-        sim.eh_Warning += (sender, e) =>
-        {
-            AddWarning(e);
-        };
-
-        sim.eh_SendMessage += (sender, e) =>
-        {
-            AddOutput(e);
-        };
-    }
-
     public void StopRunningUI()
     {
         btn_RunLine.Content = "Run Line";
@@ -311,65 +313,51 @@ public partial class MainWindow : Window
     #region Result Section
     public void AddWarning(MessageEventArgs e)
     {
-        if (!string.IsNullOrEmpty(errorList)) errorList += "\n";
+        if (!string.IsNullOrEmpty(aetxtedt_ErrorList.Text)) aetxtedt_ErrorList.Text += "\n";
 
         if(e.RelatedCodeLineId == -1)
         {
-            errorList += $"Warning: {e.Message}";
+            aetxtedt_ErrorList.Text += $"Warning: {e.Message}";
         }
         else
         {
             lineHighlighter.warningLineIds.Add(e.RelatedCodeLineId);
-            errorList += $"Warning (line{e.RelatedCodeLineId}): {e.Message}";
+            aetxtedt_ErrorList.Text += $"Warning (line{e.RelatedCodeLineId}): {e.Message}";
         }
-
-        UpdateResults();
     }
     public void AddError(MessageEventArgs e)
     {
-        if (!string.IsNullOrEmpty(errorList)) errorList += "\n";
+        if (!string.IsNullOrEmpty(aetxtedt_ErrorList.Text)) aetxtedt_ErrorList.Text += "\n";
 
         if (e.RelatedCodeLineId == -1)
         {
-            errorList += $"Error: {e.Message}";
+            aetxtedt_ErrorList.Text += $"Error: {e.Message}";
         }
         else
         {
             lineHighlighter.errorLineIds.Add(e.RelatedCodeLineId);
-            errorList += $"Error (line{e.RelatedCodeLineId}): {e.Message}";
+            aetxtedt_ErrorList.Text += $"Error (line{e.RelatedCodeLineId}): {e.Message}";
         }
-
-        UpdateResults();
     }
     public void AddOutput(MessageEventArgs e)
     {
-        if (!string.IsNullOrEmpty(output)) output += "\n";
+        if (!string.IsNullOrEmpty(aetxtedt_Output.Text)) aetxtedt_Output.Text += "\n";
 
         if (e.RelatedCodeLineId == -1)
         {
-            output += $"Output: {e.Message}";
+            aetxtedt_Output.Text += $"Output: {e.Message}";
         }
         else
         {
-            output += $"Output (line{e.RelatedCodeLineId}): {e.Message}";
+            aetxtedt_Output.Text += $"Output (line{e.RelatedCodeLineId}): {e.Message}";
         }
-
-        UpdateResults();
-    }
-
-    public void UpdateResults()
-    {
-        aetxtedt_ErrorList.Text = errorList;
-        aetxtedt_Output.Text = output;
-
-        aetxtedt_CodeEditor.TextArea.TextView.Redraw();
     }
 
     public void ClearResult()
     {
-        errorList = string.Empty;
         aetxtedt_ErrorList.Text = string.Empty;
-        output = string.Empty;
+        aetxtedt_ErrorList.Text = string.Empty;
+        aetxtedt_Output.Text = string.Empty;
         aetxtedt_Output.Text = string.Empty;
         lineHighlighter.ResetHighlight();
         aetxtedt_CodeEditor.TextArea.TextView.Redraw();
