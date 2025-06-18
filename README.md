@@ -4,7 +4,7 @@ This application provides an interface that allows users to control a simulated 
 **Target platform:** Windows, macOS, Linux
 
 **Preview**
-![image](https://github.com/user-attachments/assets/79f64c65-eeb6-44c5-ad44-aabda7e63359)
+![image](https://github.com/user-attachments/assets/0f669a13-7ff5-4dc6-8b15-270652fb2f6e)
 
 ## Features
 1. Customise workspace.
