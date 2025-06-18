@@ -4,11 +4,14 @@ This application provides an interface that allows users to control a simulated 
 **Target platform:** Windows, macOS, Linux
 
 **Preview**
-![image](https://github.com/user-attachments/assets/b9b0d1ea-a76f-4d19-a593-466b0747e5a4)
+![image](https://github.com/user-attachments/assets/79f64c65-eeb6-44c5-ad44-aabda7e63359)
+![image](https://github.com/user-attachments/assets/79f64c65-eeb6-44c5-ad44-aabda7e63359)
+
 
 ## Features
-1. An IDE for robot control code.
-2. Run code with time span between each line / Run code line by line.
-3. Robot movement preview.
+1. Customise workspace.
+2. An IDE for robot control code.
+3. Run code with time span between each line / Run code line by line.
+4. Robot movement preview.
 
 
