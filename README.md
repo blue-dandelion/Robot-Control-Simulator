@@ -5,8 +5,6 @@ This application provides an interface that allows users to control a simulated 
 
 **Preview**
 ![image](https://github.com/user-attachments/assets/79f64c65-eeb6-44c5-ad44-aabda7e63359)
-![image](https://github.com/user-attachments/assets/79f64c65-eeb6-44c5-ad44-aabda7e63359)
-
 
 ## Features
 1. Customise workspace.
