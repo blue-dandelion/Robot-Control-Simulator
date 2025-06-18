@@ -20,7 +20,7 @@ public partial class MainWindow : Window
     MainWindowViewModel vm = new();
 
     private Simulator sim;
-    private LineHighlighter lineHighlighter = new LineHighlighter();
+    private LineHighlighter codeLineHighlighter = new LineHighlighter();
 
     public MainWindow()
     {
@@ -42,23 +42,13 @@ public partial class MainWindow : Window
 
         sim.eh_ChangeRunLine += (sender, e) =>
         {
-            lineHighlighter.runningLineId = e.RelatedCodeLineId;
+            codeLineHighlighter.runningLineId = e.RelatedCodeLineId;
             aetxtedt_CodeEditor.TextArea.TextView.Redraw();
         };
 
         sim.eh_FinishRunning += (sender, e) =>
         {
             StopRunningUI();
-        };
-
-        sim.eh_Warning += (sender, e) =>
-        {
-            AddWarning(e);
-        };
-
-        sim.eh_SendMessage += (sender, e) =>
-        {
-            AddOutput(e);
         };
 
         // Buttons
@@ -239,20 +229,11 @@ public partial class MainWindow : Window
 
         // IDE
         aetxtedt_CodeEditor.TextArea.TextView.LineTransformers.Add(new KeywordColorizer());
-        aetxtedt_CodeEditor.TextArea.TextView.LineTransformers.Add(lineHighlighter);
+        aetxtedt_CodeEditor.TextArea.TextView.LineTransformers.Add(codeLineHighlighter);
 
         aetxtedt_CodeEditor.TextChanged += (sender, e) =>
         {
             aetxtedt_CodeEditor.TextArea.TextView.Redraw();
-        };
-
-        IDE.eh_Warning += (sender, e) =>
-        {
-            AddWarning(e);
-        };
-        IDE.eh_Error += (sender, e) =>
-        {
-            AddError(e);
         };
         #endregion
 
@@ -270,6 +251,34 @@ public partial class MainWindow : Window
         {
             aetxtedt_Output.TextArea.TextView.Redraw();
         };
+
+        AppConsole.EA_WriteConsoleMessage.Subscribe<WriteConsoleMessage>((WriteConsoleMessage WCM) =>
+        {
+            if(WCM.HazzardLevel == HazLev.Normal)
+            {
+                aetxtedt_Output.Text += WCM.Message + "\n";
+            }
+            else if (WCM.HazzardLevel == HazLev.Warning) 
+            {
+                if (WCM.RelatedCodeLineId >= 0)
+                {
+                    codeLineHighlighter.warningLineIds.Add(WCM.RelatedCodeLineId);
+                    aetxtedt_CodeEditor.TextArea.TextView.Redraw();
+                }
+
+                aetxtedt_ErrorList.Text += WCM.Message + "\n";
+            }
+            else if (WCM.HazzardLevel == HazLev.Error)
+            {
+                if (WCM.RelatedCodeLineId >= 0)
+                {
+                    codeLineHighlighter.errorLineIds.Add(WCM.RelatedCodeLineId);
+                    aetxtedt_CodeEditor.TextArea.TextView.Redraw();
+                }
+
+                aetxtedt_ErrorList.Text += WCM.Message + "\n";
+            }
+        });
 
         // Preview
         btn_ZoomIn.Click += (sender, e) =>
@@ -295,7 +304,7 @@ public partial class MainWindow : Window
         btn_Reset.IsEnabled = true;
         txtbox_TimeSpan.IsEnabled = true;
 
-        lineHighlighter.runningLineId = -1;
+        codeLineHighlighter.runningLineId = -1;
         aetxtedt_CodeEditor.TextArea.TextView.Redraw();
     }
     #endregion
@@ -311,89 +320,15 @@ public partial class MainWindow : Window
     #endregion
 
     #region Result Section
-    public void AddWarning(MessageEventArgs e)
-    {
-        if (!string.IsNullOrEmpty(aetxtedt_ErrorList.Text)) aetxtedt_ErrorList.Text += "\n";
-
-        if(e.RelatedCodeLineId == -1)
-        {
-            aetxtedt_ErrorList.Text += $"Warning: {e.Message}";
-        }
-        else
-        {
-            lineHighlighter.warningLineIds.Add(e.RelatedCodeLineId);
-            aetxtedt_ErrorList.Text += $"Warning (line{e.RelatedCodeLineId}): {e.Message}";
-        }
-    }
-    public void AddError(MessageEventArgs e)
-    {
-        if (!string.IsNullOrEmpty(aetxtedt_ErrorList.Text)) aetxtedt_ErrorList.Text += "\n";
-
-        if (e.RelatedCodeLineId == -1)
-        {
-            aetxtedt_ErrorList.Text += $"Error: {e.Message}";
-        }
-        else
-        {
-            lineHighlighter.errorLineIds.Add(e.RelatedCodeLineId);
-            aetxtedt_ErrorList.Text += $"Error (line{e.RelatedCodeLineId}): {e.Message}";
-        }
-    }
-    public void AddOutput(MessageEventArgs e)
-    {
-        if (!string.IsNullOrEmpty(aetxtedt_Output.Text)) aetxtedt_Output.Text += "\n";
-
-        if (e.RelatedCodeLineId == -1)
-        {
-            aetxtedt_Output.Text += $"Output: {e.Message}";
-        }
-        else
-        {
-            aetxtedt_Output.Text += $"Output (line{e.RelatedCodeLineId}): {e.Message}";
-        }
-    }
-
     public void ClearResult()
     {
         aetxtedt_ErrorList.Text = string.Empty;
         aetxtedt_ErrorList.Text = string.Empty;
         aetxtedt_Output.Text = string.Empty;
         aetxtedt_Output.Text = string.Empty;
-        lineHighlighter.ResetHighlight();
+        codeLineHighlighter.ResetHighlight();
         aetxtedt_CodeEditor.TextArea.TextView.Redraw();
     }
     #endregion
 
-}
-
-public class OutputKeywordColorizer : DocumentColorizingTransformer
-{
-    public Dictionary<string, SolidColorBrush> keywords = new()
-    {
-        {"Warning", new SolidColorBrush(SignColors.warning) },
-        {"Error", new SolidColorBrush(SignColors.error) },
-    };
-
-    protected override void ColorizeLine(DocumentLine line)
-    {
-        if (line.IsDeleted) return;
-
-        string text = CurrentContext.Document.GetText(line);
-
-        foreach (string child in keywords.Keys)
-        {
-            int index = text.IndexOf(child);
-            while (index >= 0)
-            {
-                ChangeLinePart(
-                    line.Offset + index,
-                    line.Offset + index + child.Length,
-                    element => element.TextRunProperties.SetForegroundBrush(
-                        keywords[child]
-                    ));
-
-                index = text.IndexOf(child, index + child.Length);
-            }
-        }
-    }
 }

@@ -16,8 +16,6 @@ public class Simulator
 
     public event EventHandler<MessageEventArgs>? eh_ChangeRunLine;
     public event EventHandler<MessageEventArgs>? eh_FinishRunning;
-    public event EventHandler<MessageEventArgs>? eh_Warning;
-    public event EventHandler<MessageEventArgs>? eh_SendMessage;
 
     public Robot? rob;
 
@@ -36,9 +34,14 @@ public class Simulator
     {
         // Generate a new virtual robot
         rob = new Robot(workspace);
-        rob.eh_Warning += (sender, e) =>
+        rob.eh_Falling += (sender, e) =>
         {
-            eh_Warning?.Invoke(this, new MessageEventArgs(e.Message, runningLineId));
+            AppConsole.Write(new("The robot falls out of the work space!", runningLineId), HazLev.Warning);
+        };
+        rob.eh_Report += (sender, e) =>
+        {
+            if (string.IsNullOrEmpty(rob.message)) return;
+            AppConsole.Write(new(rob.message, runningLineId), HazLev.Normal);
         };
     }
 
@@ -62,7 +65,7 @@ public class Simulator
             for (int i = 0; i < tokenLines.Count; i++)
             {
                 runningLineId++;
-                eh_ChangeRunLine?.Invoke(this, new MessageEventArgs("", runningLineId));
+                eh_ChangeRunLine?.Invoke(this, new(string.Empty, runningLineId));
 
                 cts.Token.ThrowIfCancellationRequested();
 
@@ -89,7 +92,6 @@ public class Simulator
                             break;
                         case "REPORT":
                             rob?.Report();
-                            if (!string.IsNullOrEmpty(rob?.message)) eh_SendMessage?.Invoke(this, new MessageEventArgs(rob.message, runningLineId));
                             break;
                         default:
                             break;

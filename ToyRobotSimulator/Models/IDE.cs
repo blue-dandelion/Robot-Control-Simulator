@@ -15,9 +15,6 @@ public class IDE
         "PLACE", "MOVE", "LEFT", "RIGHT", "REPORT"
     };
 
-    public static event EventHandler<MessageEventArgs>? eh_Warning;
-    public static event EventHandler<MessageEventArgs>? eh_Error;
-
     #region Check string & tokens
     public static bool IsEnd(char ch)
     {
@@ -111,19 +108,19 @@ public class IDE
                             {
                                 if (!IsInt(placeInfo[0]) || !IsInt(placeInfo[1]) || !IsDirection(placeInfo[2]))
                                 {
-                                    eh_Error?.Invoke(null, new MessageEventArgs("Invalid info for PLACE", lineId));
+                                    AppConsole.Write(new("Invalid info for PLACE.", lineId), HazLev.Error);
                                     return false;
                                 }
                             }
                             else
                             {
-                                eh_Error?.Invoke(null, new MessageEventArgs("Invalid info for PLACE", lineId));
+                                AppConsole.Write(new("Invalid info for PLACE.", lineId), HazLev.Error);
                                 return false;
                             }
                         }
                         else
                         {
-                            eh_Error?.Invoke(null, new MessageEventArgs("Invalid info for PLACE", lineId));
+                            AppConsole.Write(new("Invalid info for PLACE.", lineId), HazLev.Error);
                             return false;
                         }
                     }
@@ -132,14 +129,14 @@ public class IDE
                         // Make sure the commands follow at least one "PLACE"
                         if (!codeStart)
                         {
-                            eh_Warning?.Invoke(null, new MessageEventArgs("Command needs to start with PLACE. Otherwise the command will not run.", lineId));
+                            AppConsole.Write(new("Command needs to start with PLACE. Otherwise the command will not run.", lineId), HazLev.Warning);
                         }
                     }
 
                     continue;
                 }
 
-                eh_Error?.Invoke(null, new MessageEventArgs("Invalid token.", lineId));
+                AppConsole.Write(new("Invalid token.", lineId), HazLev.Error);
                 return false;
             }
         }
@@ -208,13 +205,13 @@ public class LineHighlighter : DocumentColorizingTransformer
 
     protected override void ColorizeLine(DocumentLine line)
     {
-        if (line.LineNumber == runningLineId)
+         if (errorLineIds.Contains(line.LineNumber))
         {
             // paint the entire line background
             ChangeLinePart(
                 line.Offset,
                 line.EndOffset,
-                element => element.TextRunProperties.SetBackgroundBrush(colRunningLine)
+                element => element.TextRunProperties.SetBackgroundBrush(colErrorLine)
             );
         }
         else if (warningLineIds.Contains(line.LineNumber))
@@ -226,13 +223,13 @@ public class LineHighlighter : DocumentColorizingTransformer
                 element => element.TextRunProperties.SetBackgroundBrush(colWarningLine)
             );
         }
-        else if (errorLineIds.Contains(line.LineNumber))
+        else if (line.LineNumber == runningLineId)
         {
             // paint the entire line background
             ChangeLinePart(
                 line.Offset,
                 line.EndOffset,
-                element => element.TextRunProperties.SetBackgroundBrush(colErrorLine)
+                element => element.TextRunProperties.SetBackgroundBrush(colRunningLine)
             );
         }
     }

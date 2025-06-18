@@ -57,7 +57,7 @@ public class FunctionTests
     {
         //Simulator sim = new Simulator();
         //string message = string.Empty;
-        //sim.eh_Warning += (sender, e) => { message += $"Warning: {e.Message}\n"; };
+        //sim.eh_Falling += (sender, e) => { message += $"Warning: {e.Message}\n"; };
         //sim.eh_SendMessage += (sender, e) => { message += $"Output: {e.Message}\n"; };
         //
         //sim.Run(code, TimeSpan.Zero);

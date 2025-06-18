@@ -2,7 +2,10 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using Avalonia.VisualTree;
+using AvaloniaEdit.Document;
+using AvaloniaEdit.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -99,4 +102,110 @@ public class Utils
     }
 
 }
+
+public class AppConsole
+{
+    public static EventAggregator EA_WriteConsoleMessage = new();
+
+    public AppConsole()
+    {
+    }
+
+    public static void Write(MessageEventArgs mea, HazLev hazLev)
+    {
+        EA_WriteConsoleMessage.Publish(new WriteConsoleMessage(mea, hazLev));
+    }
+
+}
+
+public class EventAggregator
+{
+    private readonly IDictionary<Type, List<Action<object>>> subscribers = new Dictionary<Type, List<Action<object>>>();
+
+    public void Subscribe<T>(Action<T> action)
+    {
+        if (!subscribers.ContainsKey(typeof(T)))
+        {
+            subscribers[typeof(T)] = new List<Action<object>>();
+        }
+
+        subscribers[typeof(T)].Add(x => action((T)x));
+    }
+
+    public void Publish<T>(T message)
+    {
+        if (subscribers.ContainsKey(typeof(T)) && message != null)
+        {
+            foreach (var subscriber in subscribers[typeof(T)])
+            {
+                subscriber(message);
+            }
+        }
+    }
+}
+
+public class WriteConsoleMessage
+{
+    public int RelatedCodeLineId;
+    public string Message { get; set; }
+    public HazLev HazzardLevel { get; set; }
+
+    public WriteConsoleMessage(MessageEventArgs mea, HazLev hazLev)
+    {
+        HazzardLevel = hazLev;
+        RelatedCodeLineId = mea.RelatedCodeLineId;
+
+        string header = string.Empty;
+        switch (hazLev)
+        {
+            case HazLev.Normal:
+                header = $"Output{(mea.RelatedCodeLineId == -1 ? "" : $" (line {mea.RelatedCodeLineId})")}: ";
+                break;
+            case HazLev.Warning:
+                header = $"Warning{(mea.RelatedCodeLineId == -1 ? "" : $" (line {mea.RelatedCodeLineId})")}: ";
+                break;
+            case HazLev.Error:
+                header = $"Error{(mea.RelatedCodeLineId == -1 ? "" : $" (line {mea.RelatedCodeLineId})")}: ";
+                break;
+            default:
+                break;
+        }
+
+        Message = header + mea.Message;
+    }
+}
+
+public class OutputKeywordColorizer : DocumentColorizingTransformer
+{
+    public Dictionary<string, SolidColorBrush> keywords = new()
+    {
+        {"Warning", new SolidColorBrush(SignColors.warning) },
+        {"Error", new SolidColorBrush(SignColors.error) },
+    };
+
+    protected override void ColorizeLine(DocumentLine line)
+    {
+        if (line.IsDeleted) return;
+
+        string text = CurrentContext.Document.GetText(line);
+
+        foreach (string child in keywords.Keys)
+        {
+            int index = text.IndexOf(child);
+            while (index >= 0)
+            {
+                ChangeLinePart(
+                    line.Offset + index,
+                    line.Offset + index + child.Length,
+                    element => element.TextRunProperties.SetForegroundBrush(
+                        keywords[child]
+                    ));
+
+                index = text.IndexOf(child, index + child.Length);
+            }
+        }
+    }
+}
+
+
 

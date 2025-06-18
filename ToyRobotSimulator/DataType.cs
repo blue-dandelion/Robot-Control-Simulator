@@ -13,6 +13,11 @@ public enum Direction
     NORTH, EAST, SOUTH, WEST
 }
 
+public enum HazLev
+{
+    Normal, Warning, Error
+}
+
 public class TokenLine
 {
     public int lineId;

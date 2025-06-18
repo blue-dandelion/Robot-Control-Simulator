@@ -16,7 +16,8 @@ public class Robot(Workspace ws)
     public bool startMove = false;
     public string message = string.Empty;
 
-    public event EventHandler<MessageEventArgs>? eh_Warning;
+    public event EventHandler? eh_Falling;
+    public event EventHandler? eh_Report;
 
     public bool IsInWorkspace(int x, int y)
     {
@@ -26,7 +27,7 @@ public class Robot(Workspace ws)
             return true;
         }
 
-        eh_Warning?.Invoke(this, new MessageEventArgs("The robot falls out of the work space!"));
+        eh_Falling?.Invoke(this, EventArgs.Empty);
         ws?.Danger(true);
         return false;
     }
@@ -115,5 +116,7 @@ public class Robot(Workspace ws)
         if (!startMove) return;
 
         message = $"{posX},{posY},{facing}";
+
+        eh_Report?.Invoke(this, EventArgs.Empty);
     }
 }
