@@ -119,4 +119,9 @@ public class Robot(Workspace ws)
 
         eh_Report?.Invoke(this, EventArgs.Empty);
     }
+
+    public void Reset()
+    {
+        startMove = false;
+    }
 }

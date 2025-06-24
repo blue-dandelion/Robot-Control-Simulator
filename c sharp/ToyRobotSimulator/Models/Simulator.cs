@@ -25,12 +25,15 @@ public class Simulator
     private CancellationTokenSource? cts;
     private TaskCompletionSource<bool>? tcs;
 
-    public Simulator(Workspace workspace)
+    private Workspace workspace;
+
+    public Simulator(Workspace ws)
     {
-        Reset(workspace);
+        workspace = ws;
+        Reset();
     }
 
-    public void Reset(Workspace workspace)
+    public void Reset()
     {
         // Generate a new virtual robot
         rob = new Robot(workspace);
@@ -45,6 +48,15 @@ public class Simulator
         };
     }
 
+    public void Clear()
+    {
+        workspace.Reset();
+        isRunning = false;
+        cts?.Cancel();
+        cts = new();
+        rob?.Reset();
+    }
+    
     public async void Run(string commands, TimeSpan pause, bool runLine = false)
     {
         cts?.Cancel();
@@ -54,7 +66,11 @@ public class Simulator
         List<TokenLine> tokenLines = IDE.Tokenize(commands);
 
         // Debug the commands
-        if (!IDE.GrammarCheck(tokenLines)) return;
+        if (!IDE.GrammarCheck(tokenLines))
+        {
+            StopRunning();
+            return;
+        }
 
         // Run commands
         try

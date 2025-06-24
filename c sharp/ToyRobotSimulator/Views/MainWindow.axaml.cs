@@ -55,7 +55,7 @@ public partial class MainWindow : Window
         btn_ReloadWorkspace.Click += (sender, e) =>
         {
             ws_Preview.Reload(int.Parse(txtbox_WorkspaceW.Text!), int.Parse(txtbox_WorkspaceH.Text!));
-            sim.Reset(ws_Preview);
+            sim.Reset();
         };
 
         btn_Run.Click += (sender, e) =>
@@ -115,7 +115,6 @@ public partial class MainWindow : Window
         btn_Reset.Click += (sender, e) =>
         {
             ClearResult();
-            ws_Preview.Reset();
         };
 
         #endregion
@@ -328,6 +327,8 @@ public partial class MainWindow : Window
         aetxtedt_Output.Text = string.Empty;
         codeLineHighlighter.ResetHighlight();
         aetxtedt_CodeEditor.TextArea.TextView.Redraw();
+
+        sim.Clear();
     }
     #endregion
 
