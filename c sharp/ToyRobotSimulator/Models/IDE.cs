@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace ToyRobotSimulator.Models;
+namespace RobotControlSimulator.Models;
 
 public class IDE
 {

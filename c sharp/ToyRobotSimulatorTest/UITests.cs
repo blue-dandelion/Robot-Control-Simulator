@@ -7,10 +7,10 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using AvaloniaEdit;
-using ToyRobotSimulator.Views;
+using RobotControlSimulator.Views;
 using Xunit;
 
-namespace ToyRobotSimulatorTest;
+namespace RobotControlSimulatorTest;
 
 public class UITests
 {
@@ -18,7 +18,7 @@ public class UITests
     public void Button_Clicked_EnterCode()
     {
         // Setup Avalonia in Headless Mode in the Test
-        var appBuilder = AppBuilder.Configure<ToyRobotSimulator.App>()
+        var appBuilder = AppBuilder.Configure<RobotControlSimulator.App>()
             .UseHeadless(new AvaloniaHeadlessPlatformOptions
             {
                 UseHeadlessDrawing = true
@@ -42,7 +42,7 @@ public class UITests
     public async void Text_Enter_IntOnly()
     {
         // Setup Avalonia in Headless Mode in the Test
-        var appBuilder = AppBuilder.Configure<ToyRobotSimulator.App>()
+        var appBuilder = AppBuilder.Configure<RobotControlSimulator.App>()
             .UseHeadless(new AvaloniaHeadlessPlatformOptions
             {
                 UseHeadlessDrawing = true

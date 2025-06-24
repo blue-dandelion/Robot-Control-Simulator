@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ToyRobotSimulator.UserControls;
+using RobotControlSimulator.UserControls;
 
-namespace ToyRobotSimulator.Models;
+namespace RobotControlSimulator.Models;
 
 public class Robot(Workspace ws)
 {

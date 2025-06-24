@@ -7,7 +7,7 @@ using System;
 using System.Linq;
 using System.Reactive;
 
-namespace ToyRobotSimulator.UserControls;
+namespace RobotControlSimulator.UserControls;
 
 public partial class Workspace : UserControl
 {

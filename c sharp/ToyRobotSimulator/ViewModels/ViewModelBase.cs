@@ -1,6 +1,6 @@
 ﻿using ReactiveUI;
 
-namespace ToyRobotSimulator.ViewModels;
+namespace RobotControlSimulator.ViewModels;
 
 public class ViewModelBase : ReactiveObject
 {

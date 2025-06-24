@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ToyRobotSimulator\ToyRobotSimulator.csproj" />
+    <ProjectReference Include="..\ToyRobotSimulator\RobotControlSimulator.csproj" />
   </ItemGroup>
 
 </Project>

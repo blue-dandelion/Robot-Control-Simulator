@@ -1,12 +1,12 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless;
-using ToyRobotSimulator;
-using ToyRobotSimulator.Models;
-using ToyRobotSimulator.Views;
+using RobotControlSimulator;
+using RobotControlSimulator.Models;
+using RobotControlSimulator.Views;
 using Xunit.Abstractions;
 
-namespace ToyRobotSimulatorTest;
+namespace RobotControlSimulatorTest;
 
 public class FunctionTests
 {

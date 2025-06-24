@@ -1,10 +1,10 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using ToyRobotSimulator.ViewModels;
-using ToyRobotSimulator.Views;
+using RobotControlSimulator.ViewModels;
+using RobotControlSimulator.Views;
 
-namespace ToyRobotSimulator;
+namespace RobotControlSimulator;
 
 public partial class App : Application
 {

@@ -10,10 +10,10 @@ using System.IO;
 using System.Numerics;
 using System.Reflection.Metadata;
 using System.Threading.Tasks;
-using ToyRobotSimulator.Models;
-using ToyRobotSimulator.ViewModels;
+using RobotControlSimulator.Models;
+using RobotControlSimulator.ViewModels;
 
-namespace ToyRobotSimulator.Views;
+namespace RobotControlSimulator.Views;
 
 public partial class MainWindow : Window
 {

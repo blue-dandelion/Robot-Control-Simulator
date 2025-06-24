@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ToyRobotSimulator.Models;
+namespace RobotControlSimulator.Models;
 
 public class Utils
 {

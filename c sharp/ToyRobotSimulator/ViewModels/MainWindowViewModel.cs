@@ -7,9 +7,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reactive;
 using System.Threading.Tasks;
-using ToyRobotSimulator.Views;
+using RobotControlSimulator.Views;
 
-namespace ToyRobotSimulator.ViewModels;
+namespace RobotControlSimulator.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {

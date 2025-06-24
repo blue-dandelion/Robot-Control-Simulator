@@ -3,7 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="800"
-             x:Class="ToyRobotSimulator.UserControls.Workspace">
+             x:Class="RobotControlSimulator.UserControls.Workspace">
 
   <Canvas Name="cav_Workspace" Grid.RowSpan="1000" Grid.ColumnSpan="1000" Margin="10" Background="WhiteSmoke">
     <Grid Name="grd_Ref" Width="{Binding #cav_Workspace.Width}" Height="{Binding #cav_Workspace.Height}" Opacity="0.5"/>

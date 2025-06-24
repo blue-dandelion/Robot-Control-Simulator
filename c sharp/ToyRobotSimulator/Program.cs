@@ -2,7 +2,7 @@
 using Avalonia.ReactiveUI;
 using System;
 
-namespace ToyRobotSimulator;
+namespace RobotControlSimulator;
 
 sealed class Program
 {
