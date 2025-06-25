@@ -54,10 +54,10 @@ if not grammar_correct:
 #endregion
 
 #region 3. Apply control code to robot simulator
-line_id = 0
+line_index = 0
 
 rob = robot(5, 5)
-rob.warning_event.setdefault("danger", lambda: print(f"WARNING! (line {line_id})Robot falls out of the workspace."))
+rob.warning_event.setdefault("danger", lambda: print(f"WARNING! (line {line_index + 1})Robot falls out of the workspace."))
 
 for line in token_lines:
     tokens = line
@@ -76,5 +76,5 @@ for line in token_lines:
         else:
             break
         i += 1
-    line_id += 1
+    line_index += 1
 #endregion

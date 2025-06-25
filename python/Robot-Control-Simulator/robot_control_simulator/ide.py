@@ -22,10 +22,18 @@ def tokenize(code_lines: list[str]) -> list[list[str]]:
 def grammar_check(token_lines: list[list[str]]) -> bool:
     if len(token_lines) == 0: return False
     
+    start_moving = False
+    
     for line_index, line in enumerate(token_lines):
         for token_index, token in enumerate(line):
             # Check if the token is available controls
-            if token not in available_controls:
+            if token in available_controls:
+                if token == "PLACE":
+                    start_moving = True
+                else:
+                    if not start_moving:
+                        print(f"WARNING! (line {line_index + 1})Command will not run without PLACE in the front")
+            else: 
                 # It is PLACE line
                 if line[token_index - 1] == "PLACE":
                     # Check if there is essential information for PLACE
@@ -33,12 +41,10 @@ def grammar_check(token_lines: list[list[str]]) -> bool:
                     if len(parts) == 3 and parts[0].isdigit() and parts[1].isdigit() and parts[2] in Directions.__members__:
                         continue
                     else:                
-                        print(f"ERROR! (line {line_index})Invalie info for PLACE: {token}")
+                        print(f"ERROR! (line {line_index + 1})Invalie info for PLACE: {token}")
                         return False 
                 # It is not PLACE line
                 else:             
-                    print(f"ERROR! (line {line_index})Invalie token: {token}")
+                    print(f"ERROR! (line {line_index + 1})Invalie token: {token}")
                     return False
-            else: 
-                continue
     return True
