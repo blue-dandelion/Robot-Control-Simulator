@@ -1,30 +1,32 @@
-from api.ide import tokenize, grammar_check
-from api.robot import robot
+from models.ide import CodeCompiler
+from models.robot import robot
 
 def simulate(code: str) -> tuple[list[str], list[str]]:
-    errors: list[str] = {}
-    outputs: list[str] = {}
+    errors: list[str] = []
+    outputs: list[str] = []
     
-    errors.append("hahaha")
-    #region 1. Seperate codes into lines
-    code_lines = code.split("\n")
+    #region 1. Set code compiler
+    compiler = CodeCompiler()
+    compiler.warning_event.add_handler(lambda data: errors.append(f"{data}"))
     #endregion
     
     #region 2. Compile the control code
-    token_lines = tokenize(code_lines)
-    grammar_correct = grammar_check(token_lines)
+    code_lines = code.split("\n")
+    token_lines = compiler.tokenize(code_lines)
+    grammar_correct = compiler.grammar_check(token_lines)
 
     if not grammar_correct:
-        print("Please fix the control code error.")
-        exit()
+        errors.append("Please fix the control code error.")
+        return errors, outputs
+
     #endregion
 
     #region 3. Apply code to robot
     line_index = 0
 
     rob = robot(5, 5)
-    rob.warning_event.setdefault("danger", lambda: errors.append(f"WARNING! (line {line_index + 1})Robot falls out of the workspace."))
-    rob.warning_event.setdefault("report", lambda: outputs.append(f"(line {line_index + 1})Output: {rob.pos_x},{rob.pos_y},{rob.dir.name}"))
+    rob.warning_event.add_handler(lambda: errors.append(f"(line {line_index + 1})WARNING! Robot falls out of the workspace."))
+    rob.report_event.add_handler(lambda: outputs.append(f"(line {line_index + 1})Output: {rob.pos_x},{rob.pos_y},{rob.dir.name}"))
 
     for line in token_lines:
         tokens = line
@@ -45,5 +47,5 @@ def simulate(code: str) -> tuple[list[str], list[str]]:
             i += 1
         line_index += 1
     #endregion
-    
+
     return errors, outputs

@@ -1,5 +1,4 @@
 import { Styles } from './constants/styles';
-import { StatusBar } from 'expo-status-bar';
 import { Alert, Button, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import ThemedView from './components/ThemedView';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -14,7 +13,7 @@ export default function App() {
   const runCode = async () => {
     try {
       // machine's LAN IP
-      const BASE_URL = 'http://localhost:8000'
+      const BASE_URL = 'http://192.168.1.206:8000'
 
       const result = await fetch(`${BASE_URL}/process`,
         {
@@ -26,7 +25,7 @@ export default function App() {
 
       if (!result.ok) throw new Error(`HTTP ${result.status}`);
       const json = await result.json();
-      setErrors("lala")
+      setErrors(json.errors)
       setOutputs(json.outputs)
     }
     catch (err) {

@@ -1,4 +1,4 @@
-from api.ide import Directions
+from deps import Directions, Event
 from typing import Literal
 
 class robot:
@@ -8,36 +8,16 @@ class robot:
         self.pos_x = 0
         self.pos_y = 0
         self.dir = Directions.NORTH
-        self.warning_event = {}
-        self.report_event = {}
+        self.warning_event = Event()
+        self.report_event = Event()
         self.start_moving = False
         self.output = list[str]
         
-    #region Events
-    def register_warning_event(self, name, handler):
-        # only register if it doesn't already exist
-        self.warning_event.setdefault(name, handler)
-        
-    def emit_warning_event(self, name, *args, **kwargs):
-        # look up the handler and call it
-        if name in self.warning_event:
-            self.warning_event[name](*args, **kwargs)
-            
-    def register_report_event(self, name, handler):
-        # only register if it doesn't already exist
-        self.report_event.setdefault(name, handler)
-        
-    def emit_report_event(self, name, *args, **kwargs):
-        # look up the handler and call it
-        if name in self.report_event:
-            self.report_event[name](*args, **kwargs)
-    #endregion
-    
     def is_in_workspace(self,x: int, y: int) -> bool:
         if x >= 0 and x < self.workspace_width and y >= 0 and y < self.workspace_height:
             return True
         else:
-            self.emit_warning_event("danger")
+            self.warning_event.invoke()
             return False
     
     def place(self, x: str, y: str, facing: str):
@@ -79,4 +59,4 @@ class robot:
             
     def report(self):
         if not self.start_moving: return
-        self.emit_report_event("report")
+        self.report_event.invoke()
