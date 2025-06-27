@@ -2,16 +2,19 @@ import { Styles } from './constants/styles';
 import { Alert, Button, Pressable, ScrollView, Text, TextInput, useColorScheme, View } from 'react-native';
 import ThemedView from './components/ThemedView';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import ThemedButton from './components/ThemedButton';
 import { Colors } from './constants/colors';
 import ThemedText from './components/ThemedText';
 import DecoLine from './components/DecoLine';
-import WorkspacePreview from './components/WorkspacePreview';
+import WorkspacePreview, { WorkspacePreviewHandles } from './components/WorkspacePreview';
+import { RotateTo } from './constants/deps';
 
 export default function App() {
   const colorScheme = useColorScheme()
   const theme = colorScheme ? Colors[colorScheme] : Colors.light
+
+  const workspacePreviewRef = useRef<WorkspacePreviewHandles>(null)
 
   const [code, setCode] = useState('')
   const [errors, setErrors] = useState('')
@@ -41,18 +44,37 @@ export default function App() {
     }
   }
 
+  const MOVE = () => {
+    if(workspacePreviewRef.current){
+      workspacePreviewRef.current.move();
+    }
+    else{
+
+    }
+  }
+  const ROT = () => {
+    if(workspacePreviewRef.current){
+      workspacePreviewRef.current.rotate(RotateTo.RIGHT);
+    }
+    else{
+
+    }
+  }
+
   return (
     <SafeAreaProvider>
       <ThemedView safe={true} style={{ flex: 1, flexDirection: 'column' }}>
         <View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%', height: 'auto', padding: 10, backgroundColor: theme.background_tl }}>
-          <ThemedButton text='Run' onPress={runCode} />
+          <ThemedButton text='Run' onPress={runCode}/>
+          <ThemedButton text='MOVE' onPress={MOVE} />
+          <ThemedButton text='ROT' onPress={ROT} />
         </View>
         <DecoLine direction='Horizontal' />
 
         <ScrollView>
           {/* Preview */}
           <View style={{ backgroundColor: '#000', height: 400, alignItems: 'center', justifyContent: 'center' }}>
-            <WorkspacePreview />
+            <WorkspacePreview ref={workspacePreviewRef} />
           </View>
 
           {/* IDE */}

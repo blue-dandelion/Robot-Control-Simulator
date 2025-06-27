@@ -1,34 +1,113 @@
 import { View, Text, useColorScheme, ViewProps } from 'react-native'
-import React, { forwardRef, useImperativeHandle, useState } from 'react'
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { Colors } from '../constants/colors'
+import { Direction, RotateTo } from '../constants/deps';
 
-enum Direction { 'NORTH', 'EAST', 'SOUTH', 'WEST' }
-
-export interface Handles {
+export interface WorkspacePreviewHandles {
     place(x: string, y: string, facing: Direction): void;
     move(): void;
-    rotate(): void;
+    rotate(to: RotateTo): void;
     report(): void;
 }
 
-interface Props extends ViewProps {
-    initialX?: number;
-    initialY?: number;
+export interface Props extends ViewProps {
 }
 
-const WorkspacePreview = forwardRef<Handles, Props>(({ initialX = 0, initialY = 0, style, children, ...rest }, ref) => {
+const WorkspacePreview = forwardRef<WorkspacePreviewHandles, Props>(({ style, children, ...rest }, ref) => {
     const colorScheme = useColorScheme()
     const theme = colorScheme ? Colors[colorScheme] : Colors.light
 
     const [unitSize, setUnitSize] = useState<number>(20);
     const [rows, setRows] = useState<number>(5);
     const [cols, setCols] = useState<number>(5);
+    const [posX, setPosX] = useState<number>(0);
+    const [posY, setPosY] = useState<number>(0);
+    const [facing, setFacing] = useState<Direction>(Direction.NORTH);
+
+    const facingRef = useRef(facing);
+
+    const isInWorkspace = (x: number, y: number): boolean => {
+        if (x >= 0 && x < rows && y >= 0 && y < cols) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    useEffect(() =>{
+        facingRef.current = facing
+    }, [facing])
 
     useImperativeHandle(ref, () => ({
-        place(x: string, y: string, facing: Direction) { },
-        move() { },
-        rotate() { },
-        report() { },
+        place(x: string, y: string, facing: Direction) {
+            const newX = parseInt(x, 10);
+            const newY = parseInt(y, 10);
+            if (isInWorkspace(newX, newY)) {
+                setPosX(newX);
+                setPosY(newY);
+                setFacing(facing);
+            }
+            else {
+
+            }
+        },
+        move() {
+            let newX = posX;
+            let newY = posY;
+
+            switch (facingRef.current) {
+                case Direction.NORTH:
+                    setPosY(preY => {
+                        const newY = preY + 1;
+                        if(isInWorkspace(posX, newY))
+                            return newY
+                        return preY
+                    })
+                    break;
+                case Direction.EAST:
+                    setPosX(preX => {
+                        const newX = preX + 1;
+                        if(isInWorkspace(newX, posY))
+                            return newX
+                        return preX
+                    })
+                    break;
+                case Direction.SOUTH:
+                    setPosY(preY => {
+                        const newY = preY - 1;
+                        if(isInWorkspace(posX, newY))
+                            return newY
+                        return preY
+                    })
+                    break;
+                case Direction.WEST:
+                    setPosX(preX => {
+                        const newX = preX - 1;
+                        if(isInWorkspace(newX, posY))
+                            return newX
+                        return preX
+                    })
+                    break;
+                default:
+                    break;
+            }
+        },
+        rotate(to: RotateTo) {
+            switch(to){
+                case RotateTo.LEFT:
+                    setFacing(prev => (prev + 3) % 4)
+                    break;
+                case RotateTo.RIGHT:
+                    setFacing(prev => (prev + 1) % 4)
+                    break;
+                default:
+                    break;
+            }
+        },
+        report() {
+
+        },
     }), []);
 
     const reload = (width: string, height: string) => {
@@ -70,8 +149,9 @@ const WorkspacePreview = forwardRef<Handles, Props>(({ initialX = 0, initialY = 
             {/*Robot*/}
             <View style={{
                 position: 'absolute',
-                bottom: 0,
-                left: 0,
+                bottom: posY * unitSize,
+                left: posX * unitSize,
+                transform: [{ rotate: `${facing * 90}deg` }],
                 borderTopLeftRadius: unitSize / 2,
                 borderTopRightRadius: unitSize / 2,
                 width: unitSize, height: unitSize, backgroundColor: '#c22'
