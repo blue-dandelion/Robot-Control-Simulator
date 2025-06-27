@@ -19,7 +19,7 @@ class ControlCode(BaseModel):
 
 @app.get("/")
 def home():
-    return "Hello World"
+    return "This is the backend of Robot-Control-Simulator."
 
 @app.post("/process") 
 async def process(code: ControlCode):

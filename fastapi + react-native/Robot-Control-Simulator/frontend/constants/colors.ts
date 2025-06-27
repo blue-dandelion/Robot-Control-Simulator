@@ -2,16 +2,16 @@ export const Colors = {
     dark: {
         text: '#dcdcdc',
         background_bl: '#19233c',
-        background_tl: '#192332',
+        background_tl: '#0f1428',
         background_ui: '#1e2d50',
-        decoLine: '#283c69'
+        decoLine: '#465064'
     },
 
     light: {
-        text: '#dcdcdc',
-        background_bl: '#19233c',
-        background_td: '#192332',
-        background_ui: '#1e2d50',
-        decoLine: '#283c69'
+        text: '#323232',
+        background_bl: '#fafaff',
+        background_tl: '#e6f0ff',
+        background_ui: '#cde1ff',
+        decoLine: '#b9c8e6'
     }
 }
