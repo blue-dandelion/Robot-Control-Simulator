@@ -10,11 +10,14 @@ class Directions(Enum):
     
 class Event:
     def __init__(self):
-        self.handlers = []
+        self.handlers = {}
         
-    def add_handler(self, func):
-        self.handlers.append(func)
+    def add_handler(self, name, func):
+        if name not in self.handlers:
+            self.handlers[name] = []
+        self.handlers[name].append(func)
         
-    def invoke(self, *args, **kwargs):
-        for handler in self.handlers:
-            handler(*args, **kwargs)
+    def invoke(self, name, *args, **kwargs):
+        if name in self.handlers:
+            for handler in self.handlers[name]:
+                handler(*args, **kwargs)

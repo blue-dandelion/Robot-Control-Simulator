@@ -9,7 +9,7 @@ class robot:
         self.pos_y = 0
         self.dir = Directions.NORTH
         self.warning_event = Event()
-        self.report_event = Event()
+        self.updated_event = Event()
         self.start_moving = False
         self.output = list[str]
         
@@ -29,6 +29,7 @@ class robot:
         self.pos_y = new_y
         self.dir = Directions[facing]
         self.start_moving = True
+        self.updated_event.invoke("PLACE", tuple[{self.pos_x},{self.pos_y},{self.dir}])
         
     def move(self):
         if not self.start_moving: return
@@ -47,7 +48,8 @@ class robot:
         
         if self.is_in_workspace(new_x, new_y):
             self.pos_x = new_x
-            self.pos_y = new_y       
+            self.pos_y = new_y
+            self.updated_event.invoke("MOVE", tuple[{self.pos_x},{self.pos_y}])       
     
     def rotate(self, to: Literal["LEFT", "RIGHT"]):
         if not self.start_moving: return
@@ -56,7 +58,8 @@ class robot:
             self.dir = Directions((self.dir.value - 1) % 4)
         elif to == "RIGHT":
             self.dir = Directions((self.dir.value + 1) % 4)
+        self.updated_event.invoke("ROTATE", self.dir)
             
     def report(self):
         if not self.start_moving: return
-        self.report_event.invoke()
+        self.updated_event.invoke("REPORT", f"{self.pos_x},{self.pos_y},{self.dir}")
