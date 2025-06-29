@@ -4,10 +4,9 @@ import { Colors } from '../constants/colors'
 import { Direction, RotateTo } from '../constants/deps';
 
 export interface WorkspacePreviewHandles {
-    place(x: string, y: string, facing: Direction): void;
-    move(): void;
-    rotate(to: RotateTo): void;
-    report(): void;
+    place(x: number, y: number, facing: Direction): void;
+    move(x: number, y: number): void;
+    rotate(dir: Direction): void;
 }
 
 export interface Props extends ViewProps {
@@ -26,88 +25,23 @@ const WorkspacePreview = forwardRef<WorkspacePreviewHandles, Props>(({ style, ch
 
     const facingRef = useRef(facing);
 
-    const isInWorkspace = (x: number, y: number): boolean => {
-        if (x >= 0 && x < rows && y >= 0 && y < cols) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-
     useEffect(() =>{
         facingRef.current = facing
     }, [facing])
 
     useImperativeHandle(ref, () => ({
-        place(x: string, y: string, facing: Direction) {
-            const newX = parseInt(x, 10);
-            const newY = parseInt(y, 10);
-            if (isInWorkspace(newX, newY)) {
-                setPosX(newX);
-                setPosY(newY);
-                setFacing(facing);
-            }
-            else {
-
-            }
+        place(x: number, y: number, facing: Direction) {
+            setPosX(x);
+            setPosY(y);
+            setFacing(facing);
         },
-        move() {
-            let newX = posX;
-            let newY = posY;
-
-            switch (facingRef.current) {
-                case Direction.NORTH:
-                    setPosY(preY => {
-                        const newY = preY + 1;
-                        if(isInWorkspace(posX, newY))
-                            return newY
-                        return preY
-                    })
-                    break;
-                case Direction.EAST:
-                    setPosX(preX => {
-                        const newX = preX + 1;
-                        if(isInWorkspace(newX, posY))
-                            return newX
-                        return preX
-                    })
-                    break;
-                case Direction.SOUTH:
-                    setPosY(preY => {
-                        const newY = preY - 1;
-                        if(isInWorkspace(posX, newY))
-                            return newY
-                        return preY
-                    })
-                    break;
-                case Direction.WEST:
-                    setPosX(preX => {
-                        const newX = preX - 1;
-                        if(isInWorkspace(newX, posY))
-                            return newX
-                        return preX
-                    })
-                    break;
-                default:
-                    break;
-            }
+        move(x: number, y: number) {
+            setPosX(x)
+            setPosY(y)
         },
-        rotate(to: RotateTo) {
-            switch(to){
-                case RotateTo.LEFT:
-                    setFacing(prev => (prev + 3) % 4)
-                    break;
-                case RotateTo.RIGHT:
-                    setFacing(prev => (prev + 1) % 4)
-                    break;
-                default:
-                    break;
-            }
-        },
-        report() {
-
-        },
+        rotate(dir: Direction) {
+            setFacing(dir)
+        }
     }), []);
 
     const reload = (width: string, height: string) => {

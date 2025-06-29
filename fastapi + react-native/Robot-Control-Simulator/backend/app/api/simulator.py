@@ -1,7 +1,7 @@
 from models.ide import CodeCompiler
 from models.robot import robot
-from deps import Event, Directions
-import time
+from deps import Event
+import asyncio
 
 class Simulator():
     
@@ -12,45 +12,48 @@ class Simulator():
         self.workspaceWidth = 5
         self.workspaceHeight = 5
     
-    def simulate(self, code: str, runLine: bool = False, timespanInSecond: int = 0):
-        errors: list[str] = []
-        outputs: list[str] = []
-        
+    async def simulate(self, code: str, runLine: bool = False, timespanInSecond: int = 0):
         #region 1. Set code compiler
         compiler = CodeCompiler()
-        compiler.warning_event.add_handler(lambda data: errors.append(f"{data}"))
+        
+        async def compiler_on_warning(*args):
+            await self.warning_event.invoke("", args)
+        compiler.warning_event.add_handler("", compiler_on_warning)
         #endregion
         
         #region 2. Compile the control code
         code_lines = code.split("\n")
         token_lines = compiler.tokenize(code_lines)
-        grammar_correct = compiler.grammar_check(token_lines)
+        grammar_correct = await compiler.grammar_check(token_lines)
 
         if not grammar_correct:
-            errors.append("Please fix the control code error.")
-            return errors, outputs
-
+            return
         #endregion
         
         #region 3. Init a robot
         line_index = 0
         
         rob = robot(self.workspaceWidth, self.workspaceHeight)
-        rob.warning_event.add_handler(self.warning_event.invoke(f"(line {line_index + 1})WARNING! Robot falls out of the workspace."))
+        async def rob_on_warning(*args):
+            await self.warning_event.invoke("", f"(line {line_index + 1})WARNING! Robot falls out of the workspace.")
+        rob.warning_event.add_handler("", rob_on_warning)
         
         # Send robot situation to update workspace preview
+        async def on_place(*args):
+            await self.updatePreview_event.invoke("PLACE", *args)
         rob.updated_event.add_handler("PLACE", on_place)
-        def on_place(*args:tuple[int, int, Directions]):
-            self.updatePreview_event.invoke("PLACE", f"(line {line_index + 1})Output: {args}")
+            
+        async def on_move(*args):
+            await self.updatePreview_event.invoke("MOVE", *args)
         rob.updated_event.add_handler("MOVE", on_move)
-        def on_move(*args:tuple[int, int]):
-            self.updatePreview_event.invoke("MOVE", args)
+            
+        async def on_rotate(*args):
+            await self.updatePreview_event.invoke("ROTATE", *args)
         rob.updated_event.add_handler("ROTATE", on_rotate)
-        def on_rotate(*args:Directions):
-            self.updatePreview_event.invoke("ROTATE", args)
+            
+        async def on_report(*args):
+            await self.updatePreview_event.invoke("REPORT", f"(line {line_index + 1})Output: {args}")
         rob.updated_event.add_handler("REPORT", on_report)
-        def on_report(*args:str):
-            self.updatePreview_event.invoke("REPORT", f"(line {line_index + 1})Output: {args}")
         #endregion
         
         #region 4. Apply code to robot
@@ -60,20 +63,17 @@ class Simulator():
             while i < len(tokens):
                 if tokens[i] == "PLACE":
                     info = tokens[i + 1].split(",")
-                    rob.place(info[0], info[1], info[2])
+                    await rob.place(info[0], info[1], info[2])
                     i += 1
                 elif tokens[i] == "MOVE":
-                    rob.move()
+                    await rob.move()
                 elif tokens[i] == "LEFT" or tokens[i] == "RIGHT":
-                    rob.rotate(tokens[i])
+                    await rob.rotate(tokens[i])
                 elif tokens[i] == "REPORT":
-                    rob.report()
+                    await rob.report()
                 else:
                     break
                 i += 1
             line_index += 1
-            time.sleep(timespanInSecond)
-            
+            await asyncio.sleep(timespanInSecond)
         #endregion
-
-        return errors, outputs

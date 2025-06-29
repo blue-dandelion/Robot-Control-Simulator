@@ -13,25 +13,25 @@ class robot:
         self.start_moving = False
         self.output = list[str]
         
-    def is_in_workspace(self,x: int, y: int) -> bool:
+    async def is_in_workspace(self,x: int, y: int) -> bool:
         if x >= 0 and x < self.workspace_width and y >= 0 and y < self.workspace_height:
             return True
         else:
-            self.warning_event.invoke()
+            await self.warning_event.invoke("")
             return False
     
-    def place(self, x: str, y: str, facing: str):
+    async def place(self, x: str, y: str, facing: str):
         new_x = int(x)
         new_y = int(y)
-        if not self.is_in_workspace(new_x, new_y): return
+        if not await self.is_in_workspace(new_x, new_y): return
         
         self.pos_x = new_x
         self.pos_y = new_y
         self.dir = Directions[facing]
         self.start_moving = True
-        self.updated_event.invoke("PLACE", tuple[{self.pos_x},{self.pos_y},{self.dir}])
+        await self.updated_event.invoke("PLACE", {"x":self.pos_x, "y":self.pos_y, "f":self.dir.value})
         
-    def move(self):
+    async def move(self):
         if not self.start_moving: return
         
         new_x = self.pos_x
@@ -46,20 +46,20 @@ class robot:
         elif self.dir == Directions.WEST:
             new_x -= 1
         
-        if self.is_in_workspace(new_x, new_y):
+        if await self.is_in_workspace(new_x, new_y):
             self.pos_x = new_x
             self.pos_y = new_y
-            self.updated_event.invoke("MOVE", tuple[{self.pos_x},{self.pos_y}])       
+            await self.updated_event.invoke("MOVE", {"x":self.pos_x, "y":self.pos_y})       
     
-    def rotate(self, to: Literal["LEFT", "RIGHT"]):
+    async def rotate(self, to: Literal["LEFT", "RIGHT"]):
         if not self.start_moving: return
         
         if to == "LEFT":
             self.dir = Directions((self.dir.value - 1) % 4)
         elif to == "RIGHT":
             self.dir = Directions((self.dir.value + 1) % 4)
-        self.updated_event.invoke("ROTATE", self.dir)
+        await self.updated_event.invoke("ROTATE", self.dir.value)
             
-    def report(self):
+    async def report(self):
         if not self.start_moving: return
-        self.updated_event.invoke("REPORT", f"{self.pos_x},{self.pos_y},{self.dir}")
+        await self.updated_event.invoke("REPORT", f"{self.pos_x},{self.pos_y},{self.dir.name}")

@@ -17,7 +17,7 @@ class Event:
             self.handlers[name] = []
         self.handlers[name].append(func)
         
-    def invoke(self, name, *args, **kwargs):
+    async def invoke(self, name, *args, **kwargs):
         if name in self.handlers:
             for handler in self.handlers[name]:
-                handler(*args, **kwargs)
+                await handler(*args, **kwargs)

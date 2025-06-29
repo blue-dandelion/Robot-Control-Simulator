@@ -16,7 +16,7 @@ class CodeCompiler:
                 
         return tokens
 
-    def grammar_check(self, token_lines: list[list[str]]) -> bool:
+    async def grammar_check(self, token_lines: list[list[str]]) -> bool:
         if len(token_lines) == 0: return False
         
         start_moving = False
@@ -29,7 +29,7 @@ class CodeCompiler:
                         start_moving = True
                     else:
                         if not start_moving:
-                            self.warning_event.invoke(f"(line {line_index + 1})WARNING! Command will not run without PLACE in the front")
+                            await self.warning_event.invoke("", f"(line {line_index + 1})WARNING! Command will not run without PLACE in the front")
                 else: 
                     # It is PLACE line
                     if line[token_index - 1] == "PLACE":
@@ -38,10 +38,10 @@ class CodeCompiler:
                         if len(parts) == 3 and parts[0].isdigit() and parts[1].isdigit() and parts[2] in Directions.__members__:
                             continue
                         else:
-                            self.warning_event.invoke(f"ERROR! (line {line_index + 1})Invalie info for PLACE: {token}")                
+                            await self.warning_event.invoke("", f"ERROR! (line {line_index + 1})Invalie info for PLACE: {token}")                
                             return False 
                     # It is not PLACE line
                     else: 
-                        self.warning_event.invoke(f"ERROR! (line {line_index + 1})Invalie token: {token}")                            
+                        await self.warning_event.invoke("", f"ERROR! (line {line_index + 1})Invalie token: {token}")                            
                         return False
         return True

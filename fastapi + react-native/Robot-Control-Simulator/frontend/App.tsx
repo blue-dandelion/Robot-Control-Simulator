@@ -8,7 +8,7 @@ import { Colors } from './constants/colors';
 import ThemedText from './components/ThemedText';
 import DecoLine from './components/DecoLine';
 import WorkspacePreview, { WorkspacePreviewHandles } from './components/WorkspacePreview';
-import { RotateTo } from './constants/deps';
+import { Direction, RotateTo } from './constants/deps';
 
 export default function App() {
   const colorScheme = useColorScheme()
@@ -30,20 +30,34 @@ export default function App() {
     const URL = `ws://${IPCONFIG}:8080/process`
     ws.current = new WebSocket(URL);
 
-    setConsole(prev => prev + `\nConnecting to server ${URL}...`)
+    setConsole(prev => prev + `Connecting to server ${URL}...\n`)
 
     ws.current.onopen = () => {
       setConnected(true);
-      setConsole(prev => prev + `\nConnect successfully`)
-      // Send the whole code to the server
-      //ws.current?.send(code)
+      setConsole(prev => prev + `Connect successfully\n`)
     }
 
     ws.current.onmessage = (e) => {
       try {
+        // Read the received message
         const data = JSON.parse(e.data);
-        setErrors(data.errors)
-        setErrors(data.outputs)
+        let type = data.type;
+
+        if(type == "warning"){
+          setErrors(prev => prev + data.content + '\n')
+        }
+        else if(type == "PLACE"){
+          workspacePreviewRef.current?.place(data.content.x, data.content.y, parseInt(data.content.f, 10))
+        }
+        else if(type == "MOVE"){
+          workspacePreviewRef.current?.move(data.content.x, data.content.y)
+        }
+        else if(type == "ROTATE"){
+          workspacePreviewRef.current?.rotate(parseInt(data.content, 10))
+        }
+        else if(type == "REPORT"){
+          setOutputs(prev => prev + data.content + '\n')
+        }
       }
       catch (err) {
         if (err instanceof Error)
@@ -56,7 +70,8 @@ export default function App() {
     }
 
     ws.current.onclose = () => {
-      setConsole(prev => prev + `\nWebsocket closed ${URL}`)
+      setConnected(false);
+      setConsole(prev => prev + `Websocket closed ${URL}\n`)
     }
   }
 
@@ -97,23 +112,6 @@ export default function App() {
   //   }
   // }
 
-  const MOVE = () => {
-    if (workspacePreviewRef.current) {
-      workspacePreviewRef.current.move();
-    }
-    else {
-
-    }
-  }
-  const ROT = () => {
-    if (workspacePreviewRef.current) {
-      workspacePreviewRef.current.rotate(RotateTo.RIGHT);
-    }
-    else {
-
-    }
-  }
-
   return (
     <SafeAreaProvider>
       <ThemedView safe={true} style={{ flex: 1, flexDirection: 'column' }}>
@@ -122,8 +120,6 @@ export default function App() {
         </View>
         <View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%', height: 'auto', padding: 10, backgroundColor: theme.background_tl }}>
           <ThemedButton text='Run' onPress={run} />
-          <ThemedButton text='MOVE' onPress={MOVE} />
-          <ThemedButton text='ROT' onPress={ROT} />
         </View>
         <DecoLine direction='Horizontal' />
 
