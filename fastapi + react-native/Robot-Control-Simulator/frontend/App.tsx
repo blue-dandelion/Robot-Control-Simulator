@@ -9,6 +9,7 @@ import ThemedText from './components/ThemedText';
 import DecoLine from './components/DecoLine';
 import WorkspacePreview, { WorkspacePreviewHandles } from './components/WorkspacePreview';
 import { Direction, RotateTo } from './constants/deps';
+import ThemedTextInput from './components/ThemedTextInput';
 
 export default function App() {
   const colorScheme = useColorScheme()
@@ -16,6 +17,7 @@ export default function App() {
 
   const workspacePreviewRef = useRef<WorkspacePreviewHandles>(null)
 
+  const [serverURL, setServerURL] = useState('');
   const [connected, setConnected] = useState(false);
   const [code, setCode] = useState('');
   const [errors, setErrors] = useState('');
@@ -43,19 +45,19 @@ export default function App() {
         const data = JSON.parse(e.data);
         let type = data.type;
 
-        if(type == "warning"){
+        if (type == "warning") {
           setErrors(prev => prev + data.content + '\n')
         }
-        else if(type == "PLACE"){
+        else if (type == "PLACE") {
           workspacePreviewRef.current?.place(data.content.x, data.content.y, parseInt(data.content.f, 10))
         }
-        else if(type == "MOVE"){
+        else if (type == "MOVE") {
           workspacePreviewRef.current?.move(data.content.x, data.content.y)
         }
-        else if(type == "ROTATE"){
+        else if (type == "ROTATE") {
           workspacePreviewRef.current?.rotate(parseInt(data.content, 10))
         }
-        else if(type == "REPORT"){
+        else if (type == "REPORT") {
           setOutputs(prev => prev + data.content + '\n')
         }
       }
@@ -116,9 +118,13 @@ export default function App() {
     <SafeAreaProvider>
       <ThemedView safe={true} style={{ flex: 1, flexDirection: 'column' }}>
         <View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%', height: 'auto', padding: 10, backgroundColor: theme.background_tl }}>
+          <ThemedTextInput style={{ width: 200, height: 30, marginHorizontal: 10 }} alignSelf='center' value={serverURL} onChangeText={setServerURL} />
           <ThemedButton text={connected ? "Disconnect" : "Connect"} onPress={connected ? disconnect : connect} />
         </View>
         <View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%', height: 'auto', padding: 10, backgroundColor: theme.background_tl }}>
+
+          <ThemedTextInput style={{ width: 50, height: 30, marginHorizontal: 10 }} alignSelf='center' value={serverURL} onChangeText={setServerURL} />
+
           <ThemedButton text='Run' onPress={run} />
         </View>
         <DecoLine direction='Horizontal' />

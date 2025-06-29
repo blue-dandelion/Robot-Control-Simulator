@@ -2,8 +2,11 @@ import { StyleSheet } from "react-native";
 
 export const Styles = StyleSheet.create({
     btn: {
-        padding: 15,
+        padding: 10,
         borderRadius: 5,
+        alignItems: 'center',
+        alignContent: 'center',
+        justifyContent: 'center'
     },
     container: {
         flex: 1,
@@ -14,6 +17,10 @@ export const Styles = StyleSheet.create({
     },
     txt: {
         fontSize: 16,
+    },
+    txtinput: {
+        borderRadius: 5,
+        fontSize: 16
     },
     txt_ui: {
         fontSize: 16,

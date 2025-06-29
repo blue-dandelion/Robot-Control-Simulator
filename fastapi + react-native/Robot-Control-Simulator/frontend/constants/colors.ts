@@ -12,6 +12,6 @@ export const Colors = {
         background_bl: '#fafaff',
         background_tl: '#e6f0ff',
         background_ui: '#cde1ff',
-        decoLine: '#b9c8e6'
+        decoLine: '#a0b9e1'
     }
 }

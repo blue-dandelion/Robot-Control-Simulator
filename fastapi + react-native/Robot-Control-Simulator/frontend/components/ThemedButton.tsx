@@ -3,6 +3,8 @@ import React from 'react'
 import { Styles } from '../constants/styles'
 import { Colors } from '../constants/colors'
 
+
+
 const ThemedButton = ({ style = {}, children = <></>, onPress = () => { }, text = "", ...props }) => {
     const colorScheme = useColorScheme()
     const theme = colorScheme ? Colors[colorScheme] : Colors.light
