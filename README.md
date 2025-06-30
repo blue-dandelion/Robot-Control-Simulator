@@ -9,7 +9,7 @@ FastAPI + React-native: Android, IOS
 
 **Preview**  
 Avalonia:  
-<img src="https://github.com/user-attachments/assets/0f669a13-7ff5-4dc6-8b15-270652fb2f6e" height="200">  
+<img src="https://github.com/user-attachments/assets/0f669a13-7ff5-4dc6-8b15-270652fb2f6e">  
 
 FastAPI + React-native:  
 <img src="https://github.com/user-attachments/assets/876a0a95-39a1-480e-b885-11f1423c5571" width="200">
