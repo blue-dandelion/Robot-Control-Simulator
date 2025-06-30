@@ -4,13 +4,13 @@ import { Colors } from '../constants/colors'
 import { Styles } from '../constants/styles'
 import { AlignSelfType } from '../constants/deps'
 
-
 interface Props extends TextInputProps{
   style?: any;
   value?: string;
-  alignSelf: AlignSelfType;
+  alignSelf?: AlignSelfType;
   onChangeText?: (text: string) => void;
 };
+
 const ThemedTextInput: React.FC<Props> = ({ style, value, alignSelf, onChangeText, ...props }) => {
     const colorScheme = useColorScheme()
     const theme = colorScheme ? Colors[colorScheme] : Colors.light
