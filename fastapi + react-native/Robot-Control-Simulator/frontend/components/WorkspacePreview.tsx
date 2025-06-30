@@ -8,6 +8,7 @@ export interface WorkspacePreviewHandles {
     move(x: number, y: number): void;
     rotate(dir: Direction): void;
     reload(width: number, height: number): void;
+    reset(): void;
 }
 
 export interface Props extends ViewProps {
@@ -51,6 +52,10 @@ const WorkspacePreview = forwardRef<WorkspacePreviewHandles, Props>(({ style, ch
             // Reset robot's position
             setPosX(0);
             setPosY(0);
+        },
+        reset(){
+            setPosX(0);
+            setPosY(0);
         }
     }), []);
 
@@ -90,7 +95,7 @@ const WorkspacePreview = forwardRef<WorkspacePreviewHandles, Props>(({ style, ch
                 transform: [{ rotate: `${facing * 90}deg` }],
                 borderTopLeftRadius: unitSize / 2,
                 borderTopRightRadius: unitSize / 2,
-                width: unitSize, height: unitSize, backgroundColor: '#c22'
+                width: unitSize, height: unitSize, backgroundColor: '#ff5a5a'
             }}>
 
             </View>

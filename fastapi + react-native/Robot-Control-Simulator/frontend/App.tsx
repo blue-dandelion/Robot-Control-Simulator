@@ -8,8 +8,10 @@ import { Colors } from './constants/colors';
 import ThemedText from './components/ThemedText';
 import DecoLine from './components/DecoLine';
 import WorkspacePreview, { WorkspacePreviewHandles } from './components/WorkspacePreview';
-import { Direction, RotateTo } from './constants/deps';
 import ThemedTextInput from './components/ThemedTextInput';
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 
 export default function App() {
   const colorScheme = useColorScheme()
@@ -147,6 +149,8 @@ export default function App() {
   //#region Simulator Control
   const run = () => {
     if (ws_process.current && connected_ws_process) {
+      reset();
+
       ws_process.current.send(JSON.stringify({
         type: 'run',
         content: {
@@ -163,6 +167,68 @@ export default function App() {
         type: 'stop'
       }))
     }
+  }
+
+  const reset = () => {
+    setErrors('');
+    setOutputs('');
+    setConsole('');
+    workspacePreviewRef.current?.reset();
+  }
+  //#endregion
+
+  //#region IDEs
+  const importCode = async () => {
+    // Pick a string file
+    const res = await DocumentPicker.getDocumentAsync({
+      type: 'text/plain'
+    });
+
+    if (res.canceled) {
+      // user hit "Cancel"
+      return;
+    }
+
+    // Get the picked file
+    const { uri, name, size, mimeType } = res.assets[0];
+
+    // Read it as UTF-8
+    const content = await FileSystem.readAsStringAsync(uri, {
+      encoding: FileSystem.EncodingType.UTF8,
+    });
+
+    setCode(content);
+  }
+
+  const exportCode = async () => {
+    try {
+      const fileName = 'Robot-Control-Code.txt';
+      const filePath = FileSystem.documentDirectory + fileName;
+
+      // Write the file
+      await FileSystem.writeAsStringAsync(filePath, code, {
+        encoding: FileSystem.EncodingType.UTF8
+      });
+
+      // Share / Export
+      if (!(await Sharing.isAvailableAsync())) {
+        Alert.alert('Error', 'Sharing not available on this platform');
+        return;
+      }
+      await Sharing.shareAsync(filePath, {
+        mimeType: 'text/plain',
+        dialogTitle: 'Share your .txt file',
+        UTI: 'public.plain-text'
+      })
+    } catch (err) {
+      if (err instanceof Error) {
+        Alert.alert('Error saving/sharing file', err.message);
+      }
+    }
+  }
+
+  const clearCode = async () => {
+    setCode('');
   }
   //#endregion
 
@@ -187,7 +253,7 @@ export default function App() {
         </View>
 
         {/* Simulator Control */}
-        <View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%', height: 'auto', padding: 10, backgroundColor: theme.background_tl }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%', padding: 10, backgroundColor: theme.background_tl }}>
           <ThemedText style={{ marginRight: 5, alignSelf: 'center' }}>Timespan:</ThemedText>
           <ThemedTextInput style={{ width: 50, height: 40, alignSelf: 'center' }} value={timespan} onChangeText={setTimespan} />
           <ThemedText style={{ marginRight: 10, marginLeft: 5, alignSelf: 'center' }}>s</ThemedText>
@@ -203,38 +269,41 @@ export default function App() {
 
         <ScrollView>
           {/* Preview */}
-          <View style={{ backgroundColor: '#000', height: 400, alignItems: 'center', justifyContent: 'center' }}>
+          <View style={{ height: 400, alignItems: 'center', justifyContent: 'center' }}>
             <WorkspacePreview ref={workspacePreviewRef} />
           </View>
+          <DecoLine direction='Horizontal' />
+
+          <ThemedButton text='Reset' onPress={reset} />
 
           {/* IDE */}
-          <View style={{ alignItems: 'flex-start', height: 'auto', padding: 10 }}>
+          <View style={{ alignItems: 'flex-start', padding: 10 }}>
             <ThemedText title={true}>Code</ThemedText>
+            <View style={{ flexDirection: 'row', marginVertical: 5, gap: 5 }}>
+              <ThemedButton text='Import from file' onPress={importCode} />
+              <ThemedButton text='Export file' onPress={exportCode} />
+              <View style={{ flex: 1 }} />
+              <ThemedButton text='Clear' onPress={clearCode} />
+            </View>
             <ThemedTextInput style={{ width: '100%', minHeight: 100, maxHeight: 200, backgroundColor: theme.background_tl }} value={code} multiline={true} onChangeText={setCode} />
           </View>
 
           {/* Error */}
-          <View style={{ alignItems: 'flex-start', width: '100%', height: 'auto', paddingTop: 10 }}>
-            <ThemedText title={true} style={{ marginLeft: 10, marginBottom: 5 }}>Error</ThemedText>
-            <ScrollView style={{ width: '100%', height: 100, backgroundColor: theme.background_tl }}>
-              <TextInput style={{ width: '100%', minHeight: 100, marginHorizontal: 10, fontSize: 16, color: theme.text }} editable={false} value={errors} multiline={true} onChangeText={setErrors} />
-            </ScrollView>
+          <View style={{ alignItems: 'flex-start', width: '100%', padding: 10 }}>
+            <ThemedText title={true}>Error</ThemedText>
+            <ThemedTextInput style={{ width: '100%', height: 100, backgroundColor: theme.background_tl }} editable={false} value={errors} multiline={true} onChangeText={setErrors} />
           </View>
 
           {/* Output */}
-          <View style={{ alignItems: 'flex-start', width: '100%', height: 'auto', paddingTop: 10 }}>
-            <ThemedText title={true} style={{ marginLeft: 10, marginBottom: 5 }}>Output</ThemedText>
-            <ScrollView style={{ width: '100%', height: 100, backgroundColor: theme.background_tl }}>
-              <TextInput style={{ width: '100%', minHeight: 100, marginHorizontal: 10, fontSize: 16, color: theme.text }} editable={false} value={outputs} multiline={true} onChangeText={setOutputs} />
-            </ScrollView>
+          <View style={{ alignItems: 'flex-start', width: '100%', height: 'auto', padding: 10 }}>
+            <ThemedText title={true}>Output</ThemedText>
+            <ThemedTextInput style={{ width: '100%', height: 100, backgroundColor: theme.background_tl }} editable={false} value={outputs} multiline={true} onChangeText={setOutputs} />
           </View>
 
           {/* Console */}
-          <View style={{ alignItems: 'flex-start', width: '100%', height: 'auto', paddingTop: 10 }}>
-            <ThemedText title={true} style={{ marginLeft: 10, marginBottom: 5 }}>Console</ThemedText>
-            <ScrollView style={{ width: '100%', height: 100, backgroundColor: theme.background_tl }}>
-              <TextInput style={{ width: '100%', minHeight: 100, marginHorizontal: 10, fontSize: 16, color: theme.text }} editable={false} value={console} multiline={true} onChangeText={setConsole} />
-            </ScrollView>
+          <View style={{ alignItems: 'flex-start', width: '100%', height: 'auto', padding: 10 }}>
+            <ThemedText title={true}>Console</ThemedText>
+            <ThemedTextInput style={{ width: '100%', height: 100, backgroundColor: theme.background_tl }} editable={false} value={console} multiline={true} onChangeText={setConsole} />
           </View>
 
           <View style={{ height: 500 }} />

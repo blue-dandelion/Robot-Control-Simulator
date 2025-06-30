@@ -8,19 +8,22 @@ interface Props extends TextInputProps {
     type?: 'text' | 'int' | 'digit'
     placeholder?: string;
     multiline?: boolean;
+    editable?: boolean;
     value?: string;
     onChangeText?: (text: string) => void;
 };
 
-const ThemedTextInput: React.FC<Props> = ({ style, type, placeholder, multiline, value, onChangeText, ...props }) => {
+const ThemedTextInput: React.FC<Props> = ({ style, type, placeholder, multiline, editable = true, value, onChangeText, ...props }) => {
     const colorScheme = useColorScheme()
     const theme = colorScheme ? Colors[colorScheme] : Colors.light
 
     return (
         <TextInput
-            style={[{ color: theme.text, borderWidth: 1, borderColor: theme.decoLine, padding: 2 }, Styles.txtinput, style]}
+            style={[{ color: theme.text, borderWidth: editable ? 1 : 0, borderColor: theme.decoLine, padding: 2 }, Styles.txtinput, style]}
             value={value}
             placeholder={placeholder}
+            placeholderTextColor={theme.placeholder}
+            editable={editable}
             multiline={multiline}
             onChangeText={onChangeText}>
         </TextInput>
