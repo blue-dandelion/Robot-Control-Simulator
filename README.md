@@ -1,10 +1,10 @@
 # Robot Control Simulator
-This application provides an interface that allows users to control a simulated robot using code, enabling movement along the X and Y axes within a confined workspace.
-The same application is written in different programming languages.
+This application provides an interface that allows users to control a simulated robot using code, enabling movement along the X and Y axes within a confined workspace.  
+The same application is written in different programming languages.  
 Still in development...
 
 **Target platform:** 
-Avalonia: Windows, macOS, Linux
+Avalonia: Windows, macOS, Linux  
 FastAPI + React-native: Android, IOS
 
 **Preview**  
