@@ -3,9 +3,9 @@ This application provides an interface that allows users to control a simulated 
 The same application is written in different programming languages.  
 Still in development...
 
-**Target platform:** 
+**Target platform:**  
 Avalonia: Windows, macOS, Linux  
-FastAPI + React-native: Android, IOS
+FastAPI + React-native + expo: Android, IOS
 
 **Preview**  
 Avalonia:  
