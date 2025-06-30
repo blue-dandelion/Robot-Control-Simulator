@@ -1,11 +1,16 @@
-import { Text, Pressable, useColorScheme } from 'react-native'
+import { Text, Pressable, useColorScheme, ButtonProps, ViewStyle, TextStyle, GestureResponderEvent, PressableProps } from 'react-native'
 import React from 'react'
 import { Styles } from '../constants/styles'
 import { Colors } from '../constants/colors'
 
+interface Props extends PressableProps {
+    style?: TextStyle;
+    text?: string;
+    children?: any;
+    onPress?: (e: GestureResponderEvent) => void;
+};
 
-
-const ThemedButton = ({ style = {}, children = <></>, onPress = () => { }, text = "", ...props }) => {
+const ThemedButton: React.FC<Props> = ({ style, text, children, onPress, ...props }) => {
     const colorScheme = useColorScheme()
     const theme = colorScheme ? Colors[colorScheme] : Colors.light
 

@@ -15,117 +15,189 @@ export default function App() {
   const colorScheme = useColorScheme()
   const theme = colorScheme ? Colors[colorScheme] : Colors.light
 
+  const [serverURL, setServerURL] = useState('');
+  const ws_reload = useRef<WebSocket | null>(null);
+  const ws_process = useRef<WebSocket | null>(null);
+  const [connected_ws_reload, setConnected_ws_reload] = useState(false);
+  const [connected_ws_process, setConnected_ws_process] = useState(false);
+
+  const [workspaceWidth, setWorkspaceWidth] = useState('5')
+  const [workspaceHeight, setWorkspaceHeight] = useState('5')
   const workspacePreviewRef = useRef<WorkspacePreviewHandles>(null)
 
-  const [serverURL, setServerURL] = useState('');
-  const [connected, setConnected] = useState(false);
+  const [timespan, setTimespan] = useState('1');
   const [code, setCode] = useState('');
   const [errors, setErrors] = useState('');
   const [outputs, setOutputs] = useState('');
   const [console, setConsole] = useState('');
-  const ws = useRef<WebSocket | null>(null);
 
+  //#region Server Connection
   const connect = () => {
-    if (ws.current) return;
+    setConsole(prev => prev + `Connecting to server ${serverURL}...\n`)
 
-    const IPCONFIG = '192.168.1.206'
-    const URL = `ws://${IPCONFIG}:8080/process`
-    ws.current = new WebSocket(URL);
+    //#region /reload
+    if (ws_reload.current == null) {
+      const URL = `ws://${serverURL}/reload`
+      ws_reload.current = new WebSocket(URL);
 
-    setConsole(prev => prev + `Connecting to server ${URL}...\n`)
+      ws_reload.current.onopen = () => {
+        setConnected_ws_reload(true);
+      }
 
-    ws.current.onopen = () => {
-      setConnected(true);
-      setConsole(prev => prev + `Connect successfully\n`)
-    }
+      ws_reload.current.onmessage = (e) => {
+        try {
+          // Read the received message
+          const data = JSON.parse(e.data);
+          let type = data.type;
 
-    ws.current.onmessage = (e) => {
-      try {
-        // Read the received message
-        const data = JSON.parse(e.data);
-        let type = data.type;
-
-        if (type == "warning") {
-          setErrors(prev => prev + data.content + '\n')
+          if (type == "reload") {
+            workspacePreviewRef.current?.reload(data.content.w, data.content.h)
+          }
         }
-        else if (type == "PLACE") {
-          workspacePreviewRef.current?.place(data.content.x, data.content.y, parseInt(data.content.f, 10))
-        }
-        else if (type == "MOVE") {
-          workspacePreviewRef.current?.move(data.content.x, data.content.y)
-        }
-        else if (type == "ROTATE") {
-          workspacePreviewRef.current?.rotate(parseInt(data.content, 10))
-        }
-        else if (type == "REPORT") {
-          setOutputs(prev => prev + data.content + '\n')
+        catch (err) {
+          if (err instanceof Error)
+            Alert.alert('Error', err.message)
         }
       }
-      catch (err) {
-        if (err instanceof Error)
-          Alert.alert('Error', err.message)
+
+      ws_reload.current.onerror = (e) => {
+        Alert.alert('Websocket Error', e.type)
+      }
+
+      ws_reload.current.onclose = () => {
+        setConnected_ws_reload(false);
+        ws_reload.current = null;
       }
     }
+    //#endregion
 
-    ws.current.onerror = (e) => {
-      Alert.alert('Websocket Error', e.type)
-    }
+    //#region /process
+    if (ws_process.current == null) {
+      const URL = `ws://${serverURL}/process`
+      ws_process.current = new WebSocket(URL);
 
-    ws.current.onclose = () => {
-      setConnected(false);
-      setConsole(prev => prev + `Websocket closed ${URL}\n`)
+      ws_process.current.onopen = () => {
+        setConnected_ws_process(true);
+      }
+
+      ws_process.current.onmessage = (e) => {
+        try {
+          // Read the received message
+          const data = JSON.parse(e.data);
+          let type = data.type;
+
+          if (type == "warning") {
+            setErrors(prev => prev + data.content + '\n')
+          }
+          else if (type == "PLACE") {
+            workspacePreviewRef.current?.place(data.content.x, data.content.y, parseInt(data.content.f, 10))
+          }
+          else if (type == "MOVE") {
+            workspacePreviewRef.current?.move(data.content.x, data.content.y)
+          }
+          else if (type == "ROTATE") {
+            workspacePreviewRef.current?.rotate(parseInt(data.content, 10))
+          }
+          else if (type == "REPORT") {
+            setOutputs(prev => prev + data.content + '\n')
+          }
+          else if (type == "message") {
+            setConsole(prev => prev += data.content + '\n')
+          }
+        }
+        catch (err) {
+          if (err instanceof Error)
+            Alert.alert('Error', err.message)
+        }
+      }
+
+      ws_process.current.onerror = (e) => {
+        Alert.alert('Websocket Error', e.type)
+      }
+
+      ws_process.current.onclose = () => {
+        setConnected_ws_process(false);
+        ws_process.current = null;
+      }
     }
+    //#endregion
   }
 
   const disconnect = () => {
-    if (ws.current) {
-      ws.current.close();
-      ws.current = null;
+    if (ws_reload.current) {
+      ws_reload.current.close();
+    }
+    if (ws_process.current) {
+      ws_process.current.close();
     }
   }
+  //#endregion
 
+  //#region WorkSpace
+  const reload = () => {
+    if (ws_reload.current && connected_ws_reload) {
+      ws_reload.current.send(JSON.stringify({
+        w: parseInt(workspaceWidth, 10),
+        h: parseInt(workspaceHeight, 10)
+      }))
+    }
+  }
+  //#endregion
+
+  //#region Simulator Control
   const run = () => {
-    if (ws.current && connected) {
-      ws.current.send(code);
+    if (ws_process.current && connected_ws_process) {
+      ws_process.current.send(JSON.stringify({
+        type: 'run',
+        content: {
+          timespan: parseFloat(timespan),
+          code: code
+        }
+      }));
     }
   }
 
-  // const runCode = async () => {
-  //   try {
-  //     // machine's LAN IP
-  //     const BASE_URL = 'http://192.168.1.206:8000'
-
-  //     const result = await fetch(`${BASE_URL}/process`,
-  //       {
-  //         method: 'POST',
-  //         headers: { 'Content-Type': 'application/json' },
-  //         body: JSON.stringify({ text: code })
-  //       }
-  //     );
-
-  //     if (!result.ok) throw new Error(`HTTP ${result.status}`);
-  //     const json = await result.json();
-  //     setErrors(json.errors)
-  //     setOutputs(json.outputs)
-  //   }
-  //   catch (err) {
-  //     if (err instanceof Error)
-  //       Alert.alert('Error', err.message)
-  //   }
-  // }
+  const stop = () => {
+    if (ws_process.current && connected_ws_process) {
+      ws_process.current.send(JSON.stringify({
+        type: 'stop'
+      }))
+    }
+  }
+  //#endregion
 
   return (
     <SafeAreaProvider>
       <ThemedView safe={true} style={{ flex: 1, flexDirection: 'column' }}>
-        <View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%', height: 'auto', padding: 10, backgroundColor: theme.background_tl }}>
-          <ThemedTextInput style={{ width: 200, height: 30, marginHorizontal: 10 }} alignSelf='center' value={serverURL} onChangeText={setServerURL} />
-          <ThemedButton text={connected ? "Disconnect" : "Connect"} onPress={connected ? disconnect : connect} />
-        </View>
-        <View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%', height: 'auto', padding: 10, backgroundColor: theme.background_tl }}>
 
-          <ThemedTextInput style={{ width: 50, height: 30, marginHorizontal: 10 }} alignSelf='center' value={serverURL} onChangeText={setServerURL} />
+        {/* Connection Control*/}
+        <View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%', height: 'auto', padding: 10, backgroundColor: theme.background_tl }}>
+          <ThemedTextInput style={{ width: 200, height: 40, marginHorizontal: 10, alignSelf: 'center' }} placeholder='Server IP:Port' value={serverURL} onChangeText={setServerURL} />
+          <ThemedButton text={connected_ws_reload && connected_ws_process ? "Disconnect" : "Connect"} onPress={connected_ws_reload && connected_ws_process ? disconnect : connect} />
+        </View>
+
+        {/* Workspace Settings */}
+        <View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%', height: 'auto', padding: 10, backgroundColor: theme.background_tl }}>
+          <ThemedText title={true} style={{ alignSelf: 'center' }}>Workspace</ThemedText>
+          <ThemedText style={{ alignSelf: 'center', marginLeft: 10, marginRight: 5 }}>w:</ThemedText>
+          <ThemedTextInput style={{ width: 50, height: 40, alignSelf: 'center' }} value={workspaceWidth} onChangeText={setWorkspaceWidth} />
+          <ThemedText style={{ alignSelf: 'center', marginLeft: 10, marginRight: 5 }}>h:</ThemedText>
+          <ThemedTextInput style={{ width: 50, height: 40, alignSelf: 'center' }} value={workspaceHeight} onChangeText={setWorkspaceHeight} />
+          <ThemedButton text='Reload' style={{ marginLeft: 10 }} onPress={reload} />
+        </View>
+
+        {/* Simulator Control */}
+        <View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%', height: 'auto', padding: 10, backgroundColor: theme.background_tl }}>
+          <ThemedText style={{ marginRight: 5, alignSelf: 'center' }}>Timespan:</ThemedText>
+          <ThemedTextInput style={{ width: 50, height: 40, alignSelf: 'center' }} value={timespan} onChangeText={setTimespan} />
+          <ThemedText style={{ marginRight: 10, marginLeft: 5, alignSelf: 'center' }}>s</ThemedText>
 
           <ThemedButton text='Run' onPress={run} />
+          <ThemedButton text='Run Line' style={{ marginLeft: 5 }} />
+
+          <DecoLine direction='Vertical' style={{ marginHorizontal: 10 }} />
+
+          <ThemedButton text='Stop' onPress={stop} />
         </View>
         <DecoLine direction='Horizontal' />
 
@@ -136,11 +208,9 @@ export default function App() {
           </View>
 
           {/* IDE */}
-          <View style={{ alignItems: 'flex-start', height: 'auto', paddingTop: 10 }}>
-            <ThemedText title={true} style={{ marginLeft: 10, marginBottom: 5 }}>Code</ThemedText>
-            <ScrollView style={{ width: '100%', height: 200, backgroundColor: theme.background_tl }}>
-              <TextInput style={{ width: '100%', minHeight: 200, marginHorizontal: 10, fontSize: 16, color: theme.text }} value={code} multiline={true} onChangeText={setCode} />
-            </ScrollView>
+          <View style={{ alignItems: 'flex-start', height: 'auto', padding: 10 }}>
+            <ThemedText title={true}>Code</ThemedText>
+            <ThemedTextInput style={{ width: '100%', minHeight: 100, maxHeight: 200, backgroundColor: theme.background_tl }} value={code} multiline={true} onChangeText={setCode} />
           </View>
 
           {/* Error */}

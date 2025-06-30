@@ -1,24 +1,27 @@
-import { TextInput, TextInputProps, useColorScheme } from 'react-native'
+import { TextInput, TextInputProps, TextStyle, useColorScheme } from 'react-native'
 import React from 'react'
 import { Colors } from '../constants/colors'
 import { Styles } from '../constants/styles'
-import { AlignSelfType } from '../constants/deps'
 
-interface Props extends TextInputProps{
-  style?: any;
-  value?: string;
-  alignSelf?: AlignSelfType;
-  onChangeText?: (text: string) => void;
+interface Props extends TextInputProps {
+    style?: TextStyle;
+    type?: 'text' | 'int' | 'digit'
+    placeholder?: string;
+    multiline?: boolean;
+    value?: string;
+    onChangeText?: (text: string) => void;
 };
 
-const ThemedTextInput: React.FC<Props> = ({ style, value, alignSelf, onChangeText, ...props }) => {
+const ThemedTextInput: React.FC<Props> = ({ style, type, placeholder, multiline, value, onChangeText, ...props }) => {
     const colorScheme = useColorScheme()
     const theme = colorScheme ? Colors[colorScheme] : Colors.light
 
     return (
         <TextInput
-            style={[{ color: theme.text, borderWidth: 1, borderColor: theme.decoLine, alignSelf: alignSelf }, Styles.txtinput, style]}
+            style={[{ color: theme.text, borderWidth: 1, borderColor: theme.decoLine, padding: 2 }, Styles.txtinput, style]}
             value={value}
+            placeholder={placeholder}
+            multiline={multiline}
             onChangeText={onChangeText}>
         </TextInput>
     )

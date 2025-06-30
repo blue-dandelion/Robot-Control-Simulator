@@ -7,6 +7,7 @@ export interface WorkspacePreviewHandles {
     place(x: number, y: number, facing: Direction): void;
     move(x: number, y: number): void;
     rotate(dir: Direction): void;
+    reload(width: number, height: number): void;
 }
 
 export interface Props extends ViewProps {
@@ -25,7 +26,7 @@ const WorkspacePreview = forwardRef<WorkspacePreviewHandles, Props>(({ style, ch
 
     const facingRef = useRef(facing);
 
-    useEffect(() =>{
+    useEffect(() => {
         facingRef.current = facing
     }, [facing])
 
@@ -41,16 +42,17 @@ const WorkspacePreview = forwardRef<WorkspacePreviewHandles, Props>(({ style, ch
         },
         rotate(dir: Direction) {
             setFacing(dir)
+        },
+        reload(width: number, height: number) {
+            // Resize
+            if (width > 0) setCols(width);
+            if (height > 0) setRows(height);
+
+            // Reset robot's position
+            setPosX(0);
+            setPosY(0);
         }
     }), []);
-
-    const reload = (width: string, height: string) => {
-        // Resize
-        const w = parseInt(width, 10);
-        const h = parseInt(height, 10);
-        if (!isNaN(w) && w > 0) setCols(w);
-        if (!isNaN(h) && h > 0) setRows(h);
-    }
 
     return (
         <View style={{ position: 'relative' }}>

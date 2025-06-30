@@ -16,6 +16,10 @@ class Event:
         if name not in self.handlers:
             self.handlers[name] = []
         self.handlers[name].append(func)
+
+    def remove_handler(self, name, func):
+        if name in self.handlers:
+            self.handlers[name].remove(func)
         
     async def invoke(self, name, *args, **kwargs):
         if name in self.handlers:
