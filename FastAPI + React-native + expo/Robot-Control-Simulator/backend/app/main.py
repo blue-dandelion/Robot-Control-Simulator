@@ -74,9 +74,14 @@ async def process(ws_process: WebSocket):
     async def on_report(*args):
         await ws_process.send_json({"type":"REPORT", "content":args[0]})
     sim.updatePreview_event.add_handler("REPORT", on_report)
+
+    async def on_end():
+        await ws_process.send_json({"type": "end"})
+    sim.end_event.add_handler("", on_end)
     #endregion
     
     sim_task = None
+    nextline_event = None
     try:
         while True:
             data = await ws_process.receive_json()
@@ -87,12 +92,17 @@ async def process(ws_process: WebSocket):
                 if sim_task and not sim_task.done():
                     sim_task.cancel()
                 #launch a new task
-                sim_task = asyncio.create_task(sim.simulate(data['content']['code'], False, data['content']['timespan']))
-
+                nextline_event = asyncio.Event()
+                sim_task = asyncio.create_task(sim.simulate(nextline_event, data['content']['code'], data['content']['runline'], data['content']['timespan']))
+            elif(type == 'next'):
+                nextline_event.set()
             elif(type == 'stop'):
                 if sim_task:
                     sim_task.cancel()
                     await ws_process.send_json({"type":"message", "content":"Code stops running"})
+                    await on_end()
+                    sim_task = None
+                    nextline_event = None
     except WebSocketDisconnect:
         print(".../process WebSocket disconnected")
         if sim_task:

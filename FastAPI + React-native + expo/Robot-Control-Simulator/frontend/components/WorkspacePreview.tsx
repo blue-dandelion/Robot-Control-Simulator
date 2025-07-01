@@ -1,4 +1,4 @@
-import { View, Text, useColorScheme, ViewProps } from 'react-native'
+import { View, Text, useColorScheme, ViewProps, ViewStyle } from 'react-native'
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { Colors } from '../constants/colors'
 import { Direction, RotateTo } from '../constants/deps';
@@ -9,9 +9,12 @@ export interface WorkspacePreviewHandles {
     rotate(dir: Direction): void;
     reload(width: number, height: number): void;
     reset(): void;
+    resize(dir: '+' | '-'): void;
 }
 
 export interface Props extends ViewProps {
+    style?: ViewStyle;
+    children?: any;
 }
 
 const WorkspacePreview = forwardRef<WorkspacePreviewHandles, Props>(({ style, children, ...rest }, ref) => {
@@ -53,14 +56,18 @@ const WorkspacePreview = forwardRef<WorkspacePreviewHandles, Props>(({ style, ch
             setPosX(0);
             setPosY(0);
         },
-        reset(){
+        reset() {
             setPosX(0);
             setPosY(0);
+            setFacing(Direction.NORTH)
+        },
+        resize(dir: '+' | '-') {
+            setUnitSize(prev => dir == '+' ? Math.min(100, prev + 5) : Math.max(5, prev - 5))
         }
     }), []);
 
     return (
-        <View style={{ position: 'relative' }}>
+        <View style={[{ position: 'relative' }, style]}>
             {/*Workspace*/}
             <View style={{
                 height: unitSize * rows, width: unitSize * cols

@@ -9,10 +9,11 @@ class Simulator():
         self.updatePreview_event = Event()
         self.warning_event = Event()
         self.error_event = Event()
+        self.end_event = Event()
         self.workspaceWidth = 5
         self.workspaceHeight = 5
     
-    async def simulate(self, code: str, runLine: bool = False, timespanInSecond: int = 0):
+    async def simulate(self, nextLine_event: asyncio.Event, code: str, runLine: bool = False, timespanInSecond: int = 0):
         #region 1. Set code compiler
         compiler = CodeCompiler()
         
@@ -75,5 +76,13 @@ class Simulator():
                     break
                 i += 1
             line_index += 1
-            await asyncio.sleep(timespanInSecond)
+
+            if runLine:
+                # Wait until the websocket ask to run next line
+                await nextLine_event.wait()
+                nextLine_event.clear()
+            else:
+                await asyncio.sleep(timespanInSecond)
         #endregion
+
+        await self.end_event.invoke("")

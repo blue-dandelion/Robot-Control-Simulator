@@ -1,13 +1,15 @@
 {
   "dependencies": {
-    "expo": "^53.0.13",
-    "react": "19.0.0",
-    "react-native": "0.79.4",
-    "react-native-safe-area-context": "5.4.0",
-    "typescript": "~5.8.3",
+    "expo": "^53.0.15",
     "expo-document-picker": "~13.1.6",
     "expo-file-system": "~18.1.10",
-    "expo-sharing": "~13.1.5"
+    "expo-sharing": "~13.1.5",
+    "react": "19.0.0",
+    "react-native": "^0.79.4",
+    "react-native-safe-area-context": "5.4.0",
+    "react-native-svg": "15.11.2",
+    "react-native-svg-transformer": "^1.5.1",
+    "typescript": "~5.8.3"
   },
   "devDependencies": {
     "@types/react": "^19.0.10",
