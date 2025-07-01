@@ -14,7 +14,7 @@ FastAPI + React-native + expo: Android, IOS
 
 ## Preview
 **Avalonia:**  
-<img src="https://github.com/user-attachments/assets/0f669a13-7ff5-4dc6-8b15-270652fb2f6e" height=600>
+<img src="https://github.com/user-attachments/assets/0f669a13-7ff5-4dc6-8b15-270652fb2f6e">
 
 **Python:**  
 ![image](https://github.com/user-attachments/assets/d83999a4-8517-4043-8fc6-f15e0f3732dc)
