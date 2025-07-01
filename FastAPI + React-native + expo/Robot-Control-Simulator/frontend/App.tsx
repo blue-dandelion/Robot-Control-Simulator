@@ -17,7 +17,7 @@ export default function App() {
   const colorScheme = useColorScheme()
   const theme = colorScheme ? Colors[colorScheme] : Colors.light
 
-  const [serverURL, setServerURL] = useState('192.168.54.138:8000');
+  const [serverURL, setServerURL] = useState('');
   const ws_reload = useRef<WebSocket | null>(null);
   const ws_process = useRef<WebSocket | null>(null);
   const [connected_ws_reload, setConnected_ws_reload] = useState(false);
@@ -175,6 +175,8 @@ export default function App() {
 
   //#region Simulator Control
   const run = (runline: boolean) => {
+    if (code.trim().length === 0) return;
+
     if (ws_process.current && connected_ws_process) {
       reset();
 
