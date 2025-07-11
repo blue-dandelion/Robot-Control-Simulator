@@ -282,7 +282,7 @@ export default function App() {
 
         {/* Connection Control*/}
         <View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%', height: 'auto', padding: 10, backgroundColor: theme.background_tl }}>
-          <ThemedTextInput style={{ width: 200, height: 40, marginHorizontal: 10, alignSelf: 'center' }} placeholder='Server IP:Port' value={serverURL} onChangeText={setServerURL} />
+          <ThemedTextInput style={{ width: 200, height: 40, marginHorizontal: 10, alignSelf: 'center' }} type='url' placeholder='Server IP:Port' value={serverURL} onChangeText={setServerURL} />
           <ThemedButton text={connected_ws_reload && connected_ws_process ? "Disconnect" : "Connect"} onPress={connected_ws_reload && connected_ws_process ? disconnect : connect} />
         </View>
 
@@ -290,16 +290,16 @@ export default function App() {
         <View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%', height: 'auto', padding: 10, backgroundColor: theme.background_tl }}>
           <ThemedText title={true} style={{ alignSelf: 'center' }}>Workspace</ThemedText>
           <ThemedText style={{ alignSelf: 'center', marginLeft: 10, marginRight: 5 }}>w:</ThemedText>
-          <ThemedTextInput style={{ width: 50, height: 40, alignSelf: 'center' }} value={workspaceWidth} onChangeText={setWorkspaceWidth} />
+          <ThemedTextInput style={{ width: 50, height: 40, alignSelf: 'center' }} type='int' value={workspaceWidth} onChangeText={setWorkspaceWidth} />
           <ThemedText style={{ alignSelf: 'center', marginLeft: 10, marginRight: 5 }}>h:</ThemedText>
-          <ThemedTextInput style={{ width: 50, height: 40, alignSelf: 'center' }} value={workspaceHeight} onChangeText={setWorkspaceHeight} />
+          <ThemedTextInput style={{ width: 50, height: 40, alignSelf: 'center' }} type='int' value={workspaceHeight} onChangeText={setWorkspaceHeight} />
           <ThemedButton text='Reload' style={{ marginLeft: 10 }} onPress={reload} disabled={running} />
         </View>
 
         {/* Simulator Control */}
         <View style={{ flexDirection: 'row', justifyContent: 'center', width: '100%', padding: 10, backgroundColor: theme.background_tl }}>
           <ThemedText style={{ marginRight: 5, alignSelf: 'center' }}>Timespan:</ThemedText>
-          <ThemedTextInput style={{ width: 50, height: 40, alignSelf: 'center' }} value={timespan} onChangeText={setTimespan} />
+          <ThemedTextInput style={{ width: 50, height: 40, alignSelf: 'center' }} type='digit' value={timespan} onChangeText={setTimespan} />
           <ThemedText style={{ marginRight: 10, marginLeft: 5, alignSelf: 'center' }}>s</ThemedText>
 
           <ThemedButton text='Run' onPress={() => run(false)} disabled={running} />
