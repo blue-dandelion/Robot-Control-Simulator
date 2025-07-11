@@ -1,4 +1,4 @@
-# Front End
+# Frontend
 1. Change **frontend/tsconfig.json** content to:
 ```json
 {
@@ -20,7 +20,7 @@ npx expo install
 npx expo start
 ```
 
-# Back End
+# Backend
 
 1. Create a Python Virtual Interpreter.
 
