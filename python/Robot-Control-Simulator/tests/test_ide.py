@@ -1,4 +1,4 @@
-import unittest, app.ide as ide
+import unittest, ide
 
 input = ["MOVE", "PLACE 0,0,NORTH", "LEFT", "MOVE", "RIGHT", "MOVE", "REPORT"]
 
